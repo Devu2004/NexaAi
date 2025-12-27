@@ -1,15 +1,16 @@
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 const cookie = require("cookie");
-
 const userModel = require("../models/user.model");
 const messageModel = require("../models/message.model");
 const aiServices = require("../services/ai.service");
+const { generateEmbedding } = require("../services/embedding.service");
+const { createMemory, queryMemory } = require("../services/vector.service");
 
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: "*", // adjust for prod
+      origin: "*",
       credentials: true,
     },
   });
@@ -18,22 +19,16 @@ function initSocketServer(httpServer) {
   io.use(async (socket, next) => {
     try {
       const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
-
-      if (!cookies.token) {
-        return next(new Error("Authentication Error: Token missing"));
-      }
+      if (!cookies.token) return next(new Error("Token missing"));
 
       const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET);
       const user = await userModel.findById(decoded.id);
-
-      if (!user) {
-        return next(new Error("Authentication Error: User not found"));
-      }
+      if (!user) return next(new Error("User not found"));
 
       socket.user = user;
       next();
-    } catch (error) {
-      next(new Error("Authentication Error: Invalid token"));
+    } catch (err) {
+      next(new Error("Invalid token"));
     }
   });
 
@@ -41,11 +36,8 @@ function initSocketServer(httpServer) {
   io.on("connection", (socket) => {
     console.log(`✅ User connected: ${socket.user._id}`);
 
-    // 🤖 AI MESSAGE EVENT
-    socket.on("ai-message", async (messagePayload) => {
+    socket.on("ai-message", async ({ chat, content }) => {
       try {
-        const { chat, content } = messagePayload;
-
         // 1️⃣ Save USER message
         await messageModel.create({
           chat,
@@ -54,7 +46,25 @@ function initSocketServer(httpServer) {
           role: "user",
         });
 
-        // 2️⃣ Fetch last 4 messages (context)
+        // 2️⃣ Generate embedding ONCE
+        const embeddingVector = await generateEmbedding(content);
+
+        if (!Array.isArray(embeddingVector) || embeddingVector.length === 0) {
+          throw new Error("Embedding generation failed");
+        }
+
+        const queryVector = await generateEmbedding(content);
+
+        // 3️⃣ Query Pinecone memory
+        const memories = await queryMemory({
+          queryVector,
+          limit: 5,
+          chatId: chat.toString(),
+        });
+
+        const memoryContext = memories.map((m) => m.metadata?.text).filter(Boolean).join("\n");
+
+        // 4️⃣ Fetch chat history
         const chatHistory = (
           await messageModel
             .find({ chat })
@@ -63,16 +73,28 @@ function initSocketServer(httpServer) {
             .lean()
         ).reverse();
 
-        // 3️⃣ Convert DB → Groq format
         const messagesForAI = chatHistory.map((msg) => ({
           role: msg.role === "model" ? "assistant" : "user",
           content: msg.content,
         }));
 
-        // 4️⃣ Call AI
-        const aiResponse = await aiServices.genrateResponse(messagesForAI);
+        // 5️⃣ Inject memory as system prompt
+        const messagesWithContext = [
+          {
+            role: "system",
+            content: memoryContext
+              ? `Use this memory if relevant:\n${memoryContext}`
+              : "You are a helpful AI assistant.",
+          },
+          ...messagesForAI,
+        ];
 
-        // 5️⃣ Save AI response
+        // 6️⃣ Call AI
+        const aiResponse = await aiServices.genrateResponse(
+          messagesWithContext
+        );
+
+        // 7️⃣ Save AI response
         await messageModel.create({
           chat,
           user: socket.user._id,
@@ -80,18 +102,26 @@ function initSocketServer(httpServer) {
           role: "model",
         });
 
-        // 6️⃣ Send response to client
-        socket.emit("ai-response", {
-          chat,
-          content: aiResponse,
+        // 8️⃣ Store USER memory in Pinecone
+        await createMemory({
+          vectors: embeddingVector,
+          messageId: `msg-${Date.now()}`,
+          metadata: {
+            chat: chat.toString(),
+            user: socket.user._id.toString(),
+            text: content,
+            role: "user",
+          },
         });
 
+        // 9️⃣ Emit response
+        socket.emit("ai-response", { chat, content: aiResponse });
       } catch (error) {
         console.error("AI SOCKET ERROR:", error.message);
-
         socket.emit("ai-response", {
-          chat: messagePayload.chat,
-          content: "⚠️ Bhai AI abhi available nahi hai, thodi der baad try kar!",
+          chat,
+          content:
+            "⚠️ Bhai AI abhi available nahi hai, thodi der baad try kar!",
         });
       }
     });
@@ -103,4 +133,3 @@ function initSocketServer(httpServer) {
 }
 
 module.exports = initSocketServer;
-

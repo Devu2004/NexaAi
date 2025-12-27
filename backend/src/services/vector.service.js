@@ -14,13 +14,19 @@ async function createMemory({vectors,metadata,messageId}){
     }])
 }
 
-async function queryMemory({queryVector , limit = 5, metadata}){
-    const data = await chatGptIndex.query({
-        vector:queryVector,
-        topK:limit,
-        filter:metadata ? {metadata} : undefined,
-        includeMetadata:true
-    })
+async function queryMemory({ queryVector, limit = 5, chatId }) {
+  const data = await chatGptIndex.query({
+    vector: queryVector,
+    topK: limit,
+    filter: chatId ? { chat: { $eq: chatId } } : undefined, // ✅ correct filter
+    includeMetadata: true
+  });
 
-    return data.matches
+  return data.matches;
+}
+
+
+module.exports = {
+    createMemory,
+    queryMemory
 }
