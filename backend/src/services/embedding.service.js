@@ -8,7 +8,7 @@ const HF_API = process.env.HF_API_KEY;
 const MODEL = "BAAI/bge-base-en-v1.5";
 const API_URL = `https://router.huggingface.co/hf-inference/models/${MODEL}`;
 
-async function generateEmbedding(text) {
+async function generateVector(text) {
   try {
     // ✅ HF expects inputs as array
     const payload = { inputs: [text] };
@@ -46,6 +46,6 @@ async function generateEmbedding(text) {
 
 
 
-module.exports = { generateEmbedding };
+module.exports = { generateVector };
 
 
