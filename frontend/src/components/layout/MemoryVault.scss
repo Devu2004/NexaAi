@@ -1,0 +1,116 @@
+@use '../../styles/variables' as *;
+
+// Palette refresher
+$bg-graphite: #141415;
+$sage-muted: #8b9d83;
+$dim-text: #666666;
+
+.vault-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+}
+
+.memory-vault-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100dvh;
+  width: 400px;
+  background: rgba($bg-graphite, 0.95);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+
+  @media (max-width: 768px) { width: 100%; }
+
+  .vault-header {
+    margin-bottom: 40px;
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      .vault-branding {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.6rem;
+        letter-spacing: 3px;
+        color: $sage-muted;
+      }
+      .close-btn { color: $dim-text; &:hover { color: #fff; } }
+    }
+    h1 { font-size: 1.8rem; font-weight: 200; color: #fff; margin-bottom: 10px; }
+    p { color: $dim-text; font-size: 0.8rem; line-height: 1.5; }
+  }
+
+  .vault-content {
+    flex: 1;
+    overflow-y: auto;
+    &::-webkit-scrollbar { width: 0; }
+
+    .vault-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 40px;
+      .stat-card {
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: $sage-muted;
+        .stat-info {
+          display: flex;
+          flex-direction: column;
+          .val { color: #fff; font-size: 0.9rem; font-weight: 600; }
+          .lab { color: $dim-text; font-size: 0.6rem; text-transform: uppercase; }
+        }
+      }
+    }
+
+    .memory-list {
+      .list-label { font-size: 0.6rem; letter-spacing: 2px; color: $dim-text; text-transform: uppercase; margin-bottom: 20px; }
+      .memory-item {
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        .item-meta {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: $sage-muted;
+          font-size: 0.65rem;
+          margin-bottom: 10px;
+          opacity: 0.6;
+        }
+        h3 { font-size: 1rem; color: #fff; font-weight: 400; margin-bottom: 8px; }
+        p { font-size: 0.85rem; color: $dim-text; line-height: 1.6; }
+      }
+    }
+  }
+
+  .vault-footer {
+    padding-top: 20px;
+    .clear-vault-btn {
+      width: 100%;
+      padding: 15px;
+      background: transparent;
+      border: 1px solid rgba(255, 50, 50, 0.1);
+      color: rgba(255, 50, 50, 0.4);
+      border-radius: 12px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      &:hover { background: rgba(255, 50, 50, 0.05); color: rgba(255, 50, 50, 0.8); border-color: rgba(255, 50, 50, 0.3); }
+    }
+  }
+}

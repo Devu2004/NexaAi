@@ -1,0 +1,149 @@
+.vault-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  -webkit-backdrop-filter: blur(8px);
+          backdrop-filter: blur(8px);
+  z-index: 1000;
+}
+
+.memory-vault-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100dvh;
+  width: 400px;
+  background: rgba(20, 20, 21, 0.95);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  padding: 40px;
+}
+@media (max-width: 768px) {
+  .memory-vault-panel {
+    width: 100%;
+  }
+}
+.memory-vault-panel .vault-header {
+  margin-bottom: 40px;
+}
+.memory-vault-panel .vault-header .header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+.memory-vault-panel .vault-header .header-top .vault-branding {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.6rem;
+  letter-spacing: 3px;
+  color: #8b9d83;
+}
+.memory-vault-panel .vault-header .header-top .close-btn {
+  color: #666666;
+}
+.memory-vault-panel .vault-header .header-top .close-btn:hover {
+  color: #fff;
+}
+.memory-vault-panel .vault-header h1 {
+  font-size: 1.8rem;
+  font-weight: 200;
+  color: #fff;
+  margin-bottom: 10px;
+}
+.memory-vault-panel .vault-header p {
+  color: #666666;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.memory-vault-panel .vault-content {
+  flex: 1;
+  overflow-y: auto;
+}
+.memory-vault-panel .vault-content::-webkit-scrollbar {
+  width: 0;
+}
+.memory-vault-panel .vault-content .vault-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 40px;
+}
+.memory-vault-panel .vault-content .vault-stats .stat-card {
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #8b9d83;
+}
+.memory-vault-panel .vault-content .vault-stats .stat-card .stat-info {
+  display: flex;
+  flex-direction: column;
+}
+.memory-vault-panel .vault-content .vault-stats .stat-card .stat-info .val {
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.memory-vault-panel .vault-content .vault-stats .stat-card .stat-info .lab {
+  color: #666666;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+}
+.memory-vault-panel .vault-content .memory-list .list-label {
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: #666666;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.memory-vault-panel .vault-content .memory-list .memory-item {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+.memory-vault-panel .vault-content .memory-list .memory-item .item-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8b9d83;
+  font-size: 0.65rem;
+  margin-bottom: 10px;
+  opacity: 0.6;
+}
+.memory-vault-panel .vault-content .memory-list .memory-item h3 {
+  font-size: 1rem;
+  color: #fff;
+  font-weight: 400;
+  margin-bottom: 8px;
+}
+.memory-vault-panel .vault-content .memory-list .memory-item p {
+  font-size: 0.85rem;
+  color: #666666;
+  line-height: 1.6;
+}
+.memory-vault-panel .vault-footer {
+  padding-top: 20px;
+}
+.memory-vault-panel .vault-footer .clear-vault-btn {
+  width: 100%;
+  padding: 15px;
+  background: transparent;
+  border: 1px solid rgba(255, 50, 50, 0.1);
+  color: rgba(255, 50, 50, 0.4);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.memory-vault-panel .vault-footer .clear-vault-btn:hover {
+  background: rgba(255, 50, 50, 0.05);
+  color: rgba(255, 50, 50, 0.8);
+  border-color: rgba(255, 50, 50, 0.3);
+}/*# sourceMappingURL=MemoryVault.css.map */

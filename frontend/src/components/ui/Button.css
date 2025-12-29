@@ -1,0 +1,54 @@
+.obsidian-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  border: 1px solid transparent;
+  background: transparent;
+  font-family: inherit;
+}
+.obsidian-btn .btn-icon {
+  color: #a1a1a1;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.obsidian-btn .btn-text {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.obsidian-btn.ghost {
+  padding: 8px;
+  border-radius: 6px;
+}
+.obsidian-btn.ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+.obsidian-btn.ghost:hover:not(:disabled) .btn-icon {
+  color: #fff;
+}
+.obsidian-btn.secondary {
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #a1a1a1;
+  gap: 8px;
+}
+.obsidian-btn.secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.obsidian-btn.primary {
+  padding: 12px 20px;
+  background: #ffffff;
+  color: #000;
+  font-weight: 700;
+  gap: 10px;
+}
+.obsidian-btn.primary:hover:not(:disabled) {
+  background: #e0e0e0;
+  transform: translateY(-1px);
+}/*# sourceMappingURL=Button.css.map */

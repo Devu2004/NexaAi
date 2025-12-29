@@ -1,0 +1,29 @@
+@use "sass:color";
+
+// Obsidian Editorial Palette
+$bg-obsidian: #080808;      // Deep Ink
+$surface-muted: #121212;    // Soft elevated surface
+$surface-bright: #1a1a1a;   // Hover states
+$accent-pure: #ffffff;      // Pure high-contrast accent
+$accent-color: #007bff;
+$accent-primary: #10a37f;
+
+// Typography (Editorial Feel)
+$text-primary: #ffffff;
+$text-secondary: #a1a1a1;
+$text-dim: #525252;
+
+// Borders & Dividers (Ultra-thin)
+$border-subtle: rgba(255, 255, 255, 0.06);
+$border-active: rgba(255, 255, 255, 0.15);
+
+// Layout
+$max-width-content: 900px;
+$sidebar-width: 280px;
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 12px;
+$radius-full: 9999px;
+
+// Snappy Transitions
+$ease-snappy: cubic-bezier(0.19, 1, 0.22, 1); // Fast but smooth

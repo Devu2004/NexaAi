@@ -1,0 +1,249 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.obsidian-chat {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: $bg-obsidian;
+  position: relative;
+
+  .broadcast-stream {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 16px;
+    @include no-scrollbar;
+
+    @media (min-width: 768px) {
+      padding: 0 24px;
+    }
+
+    .stream-intro {
+      height: 80%;
+      @include flex-center(column);
+      text-align: center;
+
+      .welcome-spine {
+        width: 100%;
+        max-width: 500px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+
+        .system-tag {
+          font-size: 0.6rem;
+          letter-spacing: 3px;
+          color: #10a37f;
+          border: 1px solid rgba(16, 163, 127, 0.3);
+          background: rgba(16, 163, 127, 0.05);
+          padding: 6px 14px;
+          border-radius: 20px;
+          font-weight: 700;
+        }
+
+        .user-greet {
+          font-size: 2.5rem;
+          font-weight: 800;
+          letter-spacing: -1.5px;
+          color: #fff;
+          margin: 0;
+
+          @media (min-width: 768px) {
+            font-size: 3.5rem;
+            letter-spacing: -2px;
+          }
+        }
+
+        .editorial-quote {
+          font-size: 1rem;
+          color: $text-secondary;
+          line-height: 1.6;
+          opacity: 0.8;
+          max-width: 80%;
+        }
+
+        .mood-indicator {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 0.7rem;
+          color: $text-dim;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+
+          .dot {
+            width: 6px;
+            height: 6px;
+            background: #10a37f;
+            border-radius: 50%;
+            &.pulse { animation: welcome-pulse 2s infinite; }
+          }
+        }
+      }
+    }
+
+    .message-list {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 0 150px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .system-loader {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: $text-dim;
+      font-size: 0.8rem;
+      padding: 20px 0;
+
+      .spin-icon {
+        animation: rotate-loader 1s linear infinite;
+        color: #10a37f;
+      }
+    }
+  }
+
+  /* ================= COMMAND DOCK ================= */
+  .command-dock {
+    padding: 20px 16px 30px;
+    background: linear-gradient(to top, $bg-obsidian 70%, transparent);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+
+    .command-wrapper {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      background: $surface-muted;
+      border: 1px solid $border-subtle;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      @include transition-snappy;
+
+      &:focus-within {
+        border-color: rgba(255,255,255,0.2);
+        background: $surface-bright;
+      }
+
+      .input-field {
+        padding: 16px 20px 4px;
+
+        textarea {
+          width: 100%;
+          background: transparent;
+          border: none;
+          outline: none;
+          color: #fff;
+          font-size: 1rem;
+          line-height: 1.5;
+          resize: none;
+          max-height: 200px;
+          @include no-scrollbar;
+
+          &::placeholder {
+            color: $text-dim;
+          }
+        }
+      }
+
+      .input-controls {
+        padding: 8px 12px 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .shortcut-hint {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          color: $text-dim;
+          font-size: 0.65rem;
+          font-weight: 600;
+        }
+
+        /* ================= SEND BUTTON (FIXED) ================= */
+        .send-trigger {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          background: rgba(255, 255, 255, 0.06);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          border: none;
+          padding: 0;
+          @include transition-snappy;
+
+          .btn-icon,
+          svg {
+            width: 18px;
+            height: 18px;
+            color: $text-dim;
+            transition: color 0.2s ease, transform 0.2s ease;
+          }
+
+          &:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+          }
+
+          &.active {
+            background: #fff;
+
+            .btn-icon,
+            svg {
+              color: #000;
+              transform: translateX(1px); // subtle send feel
+            }
+          }
+
+          &:disabled {
+            cursor: not-allowed;
+            opacity: 0.35;
+          }
+
+          &.loading-active {
+            background: rgba(255, 255, 255, 0.08);
+
+            .btn-icon,
+            svg {
+              animation: rotate-loader 1s linear infinite;
+              color: #10a37f;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/* ================= ANIMATIONS ================= */
+@keyframes rotate-loader {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes welcome-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 163, 127, 0.4);
+  }
+  70% {
+    transform: scale(1.3);
+    box-shadow: 0 0 0 10px rgba(16, 163, 127, 0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

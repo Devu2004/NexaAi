@@ -1,0 +1,29 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.page-wrapper-root {
+  // Mobile First: Dynamic Viewport Height for absolute stability
+  height: 100dvh; 
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background-color: #141415; // Your Deep Graphite base
+  position: relative;
+  
+  // High-performance hardware acceleration for animations
+  will-change: transform, opacity, filter;
+  
+  // Prevents scrolling issues during page transitions
+  overflow: hidden; 
+
+  // Responsive logic for larger devices
+  @media (min-width: 768px) {
+    // Desktop par ensure karte hain ki overflow handling seamless rahe
+    overflow-x: hidden;
+  }
+
+  // Support for older mobile browsers that don't support dvh
+  @supports not (height: 100dvh) {
+    height: 100vh;
+  }
+}

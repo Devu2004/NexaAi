@@ -1,0 +1,166 @@
+@use '../styles/variables' as *;
+@use '../styles/mixins' as *;
+
+$transition-speed: 0.35s;
+
+.obsidian-app-container {
+  display: flex;
+  height: 100dvh;
+  width: 100vw;
+  background-color: $bg-obsidian;
+  overflow: hidden;
+  position: relative;
+
+  /* ---------------- MOBILE OVERLAY ---------------- */
+  .sidebar-mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity $transition-speed ease;
+
+    &.active {
+      @media (max-width: 1023px) {
+        opacity: 1;
+        pointer-events: auto;
+      }
+    }
+  }
+
+  /* ---------------- VIEWPORT ---------------- */
+  .chat-viewport {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    background-color: $bg-obsidian;
+
+    .viewport-header {
+      height: 64px;
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid $border-subtle;
+      background: rgba($bg-obsidian, 0.85);
+      backdrop-filter: blur(15px);
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+
+        .sidebar-toggle-btn {
+          @include transition-snappy;
+          &.is-hidden {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+            margin-right: 0;
+          }
+        }
+
+        .breadcrumb-box {
+          .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden; // Prevent long chat titles from breaking header
+
+            .root { color: $text-dim; }
+            .separator { color: $text-dim; opacity: 0.35; }
+            .current {
+              color: $text-primary;
+              border-bottom: 1px solid #10a37f;
+              padding-bottom: 2px;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              max-width: 200px; // Responsive limit for title
+            }
+          }
+        }
+      }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+
+        .header-actions {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .user-block {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+
+        .user-indicator {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          padding: 6px 12px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid $border-subtle;
+          border-radius: 18px;
+
+          .status-dot {
+            width: 7px;
+            height: 7px;
+            background: #22c55e;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+          }
+
+          .user-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: $text-secondary;
+          }
+        }
+
+        .profile-trigger {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          border: 1px solid $border-subtle;
+          background: $surface-muted;
+          cursor: pointer;
+          overflow: hidden;
+          @include flex-center;
+          @include transition-snappy;
+
+          &:hover { transform: scale(1.05); border-color: #fff; }
+          .user-avatar { width: 100%; height: 100%; object-fit: cover; }
+          .user-initial { color: #fff; font-size: 14px; font-weight: 700; }
+        }
+      }
+    }
+
+    .chat-content { flex: 1; overflow: hidden; }
+  }
+
+  /* --- RESPONSIVE BREAKPOINTS --- */
+  @media (max-width: 1023px) {
+    .header-right .user-indicator { display: none; }
+    .breadcrumb-box .breadcrumb {
+      font-size: clamp(0.55rem, 2.5vw, 0.65rem);
+      .current { max-width: 120px; }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .breadcrumb-box .breadcrumb { font-size: 0.5rem; }
+  }
+}

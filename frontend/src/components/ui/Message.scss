@@ -1,0 +1,120 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.editorial-message {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 800px; // Standard reading width
+  margin: 0 auto;
+
+  // 1. Header Styling
+  .msg-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+
+    .author-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .icon-frame {
+        width: 24px;
+        height: 24px;
+        @include flex-center;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid $border-subtle;
+        border-radius: 4px;
+        color: $text-secondary;
+      }
+
+      .name {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: $text-dim;
+        text-transform: uppercase;
+      }
+    }
+
+    .copy-trigger {
+      color: $text-dim;
+      opacity: 0;
+      @include transition-snappy;
+      &:hover { color: #fff; }
+    }
+  }
+
+  &:hover .copy-trigger { opacity: 1; }
+
+  // 2. Content Logic
+  .msg-body {
+    position: relative;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    @include transition-snappy;
+  }
+
+  // 3. Variant: USER (Right Aligned + Boxed)
+  &.user {
+    align-items: flex-end;
+    .author-tag { flex-direction: row-reverse; }
+    
+    .msg-body {
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid $border-subtle;
+      border-radius: $radius-md $radius-sm $radius-md $radius-md;
+      color: #fff;
+      max-width: 85%;
+      text-align: right;
+    }
+  }
+
+  // 4. Variant: AI (Left Aligned + Editorial Border)
+  &.ai {
+    align-items: flex-start;
+    padding-bottom: 20px;
+    
+    .author-tag .icon-frame {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+
+    .msg-body {
+      padding: 4px 0 4px 28px; // Space for the vertical line
+      color: $text-secondary;
+      
+      // The Editorial Accent Line
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 5%;
+        bottom: 5%;
+        width: 1.5px;
+        background: $border-active;
+        @include transition-snappy;
+      }
+
+      &:hover::before {
+        background: #fff;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+      }
+    }
+  }
+}
+
+// Mobile Adjustments
+@media (max-width: 768px) {
+  .editorial-message {
+    padding: 0 16px;
+    &.user .msg-body { max-width: 95%; }
+  }
+}

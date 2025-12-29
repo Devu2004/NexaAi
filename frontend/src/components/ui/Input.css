@@ -1,0 +1,63 @@
+.obsidian-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.obsidian-input-group .input-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #525252;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.obsidian-input-group .input-wrapper {
+  position: relative;
+}
+.obsidian-input-group .input-wrapper input {
+  width: 100%;
+  background: #121212;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 14px 16px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.obsidian-input-group .input-wrapper input::-moz-placeholder {
+  color: #525252;
+}
+.obsidian-input-group .input-wrapper input::placeholder {
+  color: #525252;
+}
+.obsidian-input-group .input-wrapper input:focus {
+  background: #1a1a1a;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.obsidian-input-group .input-wrapper .input-focus-line {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 1.5px;
+  background: #fff;
+  transform: translateX(-50%);
+  transition: width 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.obsidian-input-group .input-wrapper input:focus + .input-focus-line {
+  width: 100%;
+}
+.obsidian-input-group:focus-within .input-label {
+  color: #ffffff;
+}
+.obsidian-input-group.has-error .input-wrapper input {
+  border-color: #ef4444;
+}
+.obsidian-input-group.has-error .error-text {
+  font-size: 0.7rem;
+  color: #ef4444;
+  margin-top: 4px;
+}/*# sourceMappingURL=Input.css.map */

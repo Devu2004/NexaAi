@@ -1,0 +1,108 @@
+.editorial-message {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.editorial-message .msg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+.editorial-message .msg-header .author-tag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.editorial-message .msg-header .author-tag .icon-frame {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  color: #a1a1a1;
+}
+.editorial-message .msg-header .author-tag .name {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #525252;
+  text-transform: uppercase;
+}
+.editorial-message .msg-header .copy-trigger {
+  color: #525252;
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.editorial-message .msg-header .copy-trigger:hover {
+  color: #fff;
+}
+.editorial-message:hover .copy-trigger {
+  opacity: 1;
+}
+.editorial-message .msg-body {
+  position: relative;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.editorial-message.user {
+  align-items: flex-end;
+}
+.editorial-message.user .author-tag {
+  flex-direction: row-reverse;
+}
+.editorial-message.user .msg-body {
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px 4px 8px 8px;
+  color: #fff;
+  max-width: 85%;
+  text-align: right;
+}
+.editorial-message.ai {
+  align-items: flex-start;
+  padding-bottom: 20px;
+}
+.editorial-message.ai .author-tag .icon-frame {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+.editorial-message.ai .msg-body {
+  padding: 4px 0 4px 28px;
+  color: #a1a1a1;
+}
+.editorial-message.ai .msg-body::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 5%;
+  bottom: 5%;
+  width: 1.5px;
+  background: rgba(255, 255, 255, 0.15);
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.editorial-message.ai .msg-body:hover::before {
+  background: #fff;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .editorial-message {
+    padding: 0 16px;
+  }
+  .editorial-message.user .msg-body {
+    max-width: 95%;
+  }
+}/*# sourceMappingURL=Message.css.map */

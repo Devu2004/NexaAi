@@ -1,0 +1,20 @@
+.page-wrapper-root {
+  height: 100dvh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background-color: #141415;
+  position: relative;
+  will-change: transform, opacity, filter;
+  overflow: hidden;
+}
+@media (min-width: 768px) {
+  .page-wrapper-root {
+    overflow-x: hidden;
+  }
+}
+@supports not (height: 100dvh) {
+  .page-wrapper-root {
+    height: 100vh;
+  }
+}/*# sourceMappingURL=PageWrapper.css.map */

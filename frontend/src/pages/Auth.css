@@ -1,0 +1,168 @@
+.auth-obsidian {
+  min-height: 100dvh;
+  width: 100vw;
+  background-color: #080808;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+  position: relative;
+}
+.auth-obsidian::before {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(16, 163, 127, 0.05) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.auth-obsidian .auth-spine {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+.auth-obsidian .auth-spine .auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.auth-obsidian .auth-spine .auth-brand .brand-symbol {
+  color: #fff;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+}
+.auth-obsidian .auth-spine .auth-brand .brand-tag {
+  font-size: 0.6rem;
+  letter-spacing: 4px;
+  color: #525252;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.auth-obsidian .auth-spine .auth-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.auth-obsidian .auth-spine .auth-header h1 {
+  font-size: 2.2rem;
+  letter-spacing: -1.5px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #fff;
+}
+.auth-obsidian .auth-spine .auth-header p {
+  font-size: 0.9rem;
+  color: #a1a1a1;
+  line-height: 1.6;
+  max-width: 90%;
+  margin: 0 auto;
+}
+.auth-obsidian .auth-spine .auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.auth-obsidian .auth-spine .auth-form .form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+@media (min-width: 600px) {
+  .auth-obsidian .auth-spine .auth-form .form-row {
+    flex-direction: row;
+    gap: 16px;
+  }
+  .auth-obsidian .auth-spine .auth-form .form-row > div {
+    flex: 1;
+  }
+}
+.auth-obsidian .auth-spine .auth-form .password-field-wrapper {
+  position: relative;
+}
+.auth-obsidian .auth-spine .auth-form .password-field-wrapper .field-action {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}
+.auth-obsidian .auth-spine .auth-form .password-field-wrapper .field-action .editorial-link.small {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #525252;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.auth-obsidian .auth-spine .auth-form .password-field-wrapper .field-action .editorial-link.small:hover {
+  color: #10a37f;
+  transform: translateY(-1px);
+}
+.auth-obsidian .auth-spine .auth-form .auth-submit {
+  width: 100%;
+  padding: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+.auth-obsidian .auth-spine .auth-form .auth-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+}
+.auth-obsidian .auth-spine .auth-footer {
+  margin-top: 20px;
+  text-align: center;
+}
+.auth-obsidian .auth-spine .auth-footer p {
+  font-size: 0.85rem;
+  color: #525252;
+  letter-spacing: 0.3px;
+}
+.auth-obsidian .auth-spine .auth-footer .editorial-link {
+  color: #fff;
+  margin-left: 8px;
+  font-weight: 700;
+  position: relative;
+  text-decoration: none;
+}
+.auth-obsidian .auth-spine .auth-footer .editorial-link::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.3s ease;
+}
+.auth-obsidian .auth-spine .auth-footer .editorial-link:hover::after {
+  background: #fff;
+}
+
+.resend-text {
+  font-size: 0.7rem;
+  color: #525252;
+  text-align: center;
+  margin-top: 15px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+.resend-text:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.auth-spine {
+  overflow: hidden;
+  min-height: 450px;
+}/*# sourceMappingURL=Auth.css.map */

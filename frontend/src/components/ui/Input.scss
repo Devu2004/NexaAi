@@ -1,0 +1,69 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.obsidian-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 20px;
+
+  .input-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: $text-dim;
+    @include transition-snappy;
+  }
+
+  .input-wrapper {
+    position: relative;
+    
+    input {
+      width: 100%;
+      background: $surface-muted;
+      border: 1px solid $border-subtle;
+      border-radius: $radius-sm;
+      padding: 14px 16px;
+      color: #fff;
+      font-size: 0.9rem;
+      font-family: inherit;
+      @include transition-snappy;
+
+      &::placeholder {
+        color: $text-dim;
+      }
+
+      &:focus {
+        background: $surface-bright;
+        border-color: $border-active;
+      }
+    }
+
+    // A sharp underline that appears on focus
+    .input-focus-line {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      width: 0;
+      height: 1.5px;
+      background: #fff;
+      transform: translateX(-50%);
+      @include transition-snappy(width);
+    }
+
+    input:focus + .input-focus-line {
+      width: 100%;
+    }
+  }
+
+  &:focus-within .input-label {
+    color: $text-primary;
+  }
+
+  &.has-error {
+    .input-wrapper input { border-color: #ef4444; }
+    .error-text { font-size: 0.7rem; color: #ef4444; margin-top: 4px; }
+  }
+}

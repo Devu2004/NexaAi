@@ -1,0 +1,69 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.obsidian-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  @include transition-snappy;
+  border: 1px solid transparent;
+  background: transparent;
+  font-family: inherit;
+
+  // Icon handling
+  .btn-icon {
+    color: $text-secondary;
+    @include transition-snappy;
+  }
+
+  // Text handling
+  .btn-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  // Ghost Variant: Specifically for Toggles & Icons
+  &.ghost {
+    padding: 8px;
+    border-radius: 6px;
+    
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: $border-subtle;
+      
+      .btn-icon { color: #fff; }
+    }
+  }
+
+  // Secondary Variant (Like Memory button)
+  &.secondary {
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid $border-subtle;
+    color: $text-secondary;
+    gap: 8px;
+
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+  }
+
+  // Primary (Like New Broadcast)
+  &.primary {
+    padding: 12px 20px;
+    background: #ffffff;
+    color: #000;
+    font-weight: 700;
+    gap: 10px;
+
+    &:hover:not(:disabled) {
+      background: #e0e0e0;
+      transform: translateY(-1px);
+    }
+  }
+}

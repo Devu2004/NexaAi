@@ -1,0 +1,35 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+html, body, #root, .nova-app-root {
+  height: 100dvh;
+  width: 100vw;
+  background-color: #080808;
+  color: #ffffff;
+  font-family: "Inter", -apple-system, system-ui, sans-serif;
+  overflow: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+:focus {
+  outline: none;
+}
+
+.custom-scroll {
+  overflow-y: auto;
+}
+.custom-scroll::-webkit-scrollbar {
+  width: 3px;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #525252;
+  border-radius: 10px;
+}/*# sourceMappingURL=App.css.map */
