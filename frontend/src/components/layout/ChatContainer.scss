@@ -8,6 +8,13 @@
   background-color: $bg-obsidian;
   position: relative;
 
+  /* ================= NEW: LOCKED STATE VISUALS ================= */
+  &.state-locked {
+    .broadcast-stream {
+      background-image: radial-gradient(circle at center, rgba(16, 163, 127, 0.02) 0%, transparent 70%);
+    }
+  }
+
   .broadcast-stream {
     flex: 1;
     overflow-y: auto;
@@ -16,6 +23,50 @@
 
     @media (min-width: 768px) {
       padding: 0 24px;
+    }
+
+    /* ================= NEW: STREAM PLACEHOLDER (LOCKED) ================= */
+    .stream-placeholder {
+      height: 100%;
+      @include flex-center(column);
+      text-align: center;
+
+      .lock-notice {
+        max-width: 320px;
+        padding: 40px;
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px dashed rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .lock-icon-wrapper {
+          width: 64px;
+          height: 64px;
+          background: rgba(255, 255, 255, 0.03);
+          border-radius: 50%;
+          @include flex-center;
+          margin-bottom: 24px;
+          color: $text-dim;
+          opacity: 0.5;
+        }
+
+        h3 {
+          color: #fff;
+          font-size: 1.25rem;
+          margin-bottom: 12px;
+          letter-spacing: -0.5px;
+          font-weight: 600;
+        }
+
+        p {
+          color: $text-dim;
+          font-size: 0.85rem;
+          line-height: 1.5;
+          margin: 0;
+        }
+      }
     }
 
     .stream-intro {
@@ -61,6 +112,12 @@
           line-height: 1.6;
           opacity: 0.8;
           max-width: 80%;
+
+          .id-highlight {
+            color: #10a37f;
+            font-family: monospace;
+            font-size: 0.9rem;
+          }
         }
 
         .mood-indicator {
@@ -118,6 +175,24 @@
     left: 0;
     right: 0;
     z-index: 100;
+    @include transition-snappy;
+
+    /* ================= NEW: COMMAND DOCK LOCKED STATE ================= */
+    &.is-locked {
+      opacity: 0.7;
+      
+      .command-wrapper {
+        background: rgba(255, 255, 255, 0.02) !important;
+        border-color: rgba(255, 255, 255, 0.05) !important;
+        cursor: not-allowed;
+        box-shadow: none;
+
+        textarea {
+          cursor: not-allowed;
+          filter: blur(0.5px);
+        }
+      }
+    }
 
     .command-wrapper {
       width: 100%;
@@ -204,7 +279,7 @@
             .btn-icon,
             svg {
               color: #000;
-              transform: translateX(1px); // subtle send feel
+              transform: translateX(1px);
             }
           }
 
@@ -245,5 +320,40 @@
   }
   100% {
     transform: scale(1);
+  }
+}
+.message-wrapper {
+  position: relative;
+  // group: hover; 
+
+  .copy-btn {
+    position: absolute;
+    right: -40px; // Message box ke bahar side mein
+    top: 10px;
+    padding: 6px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: #666;
+    opacity: 0; // Shuru mein chhupa do
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #10a37f;
+      
+    }
+
+    &.copied {
+      color: #10a37f;
+      border-color: #10a37f;
+      opacity: 1;
+    }
+  }
+
+  &:hover .copy-btn {
+    opacity: 1; // Message par hover karte hi button dikhega
+    right: 0px; // Halka sa slide in effect
   }
 }

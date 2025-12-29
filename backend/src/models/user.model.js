@@ -1,23 +1,48 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 
 const mongooseSchema = new mongoose.Schema({
-    email:{
-        type:String,
-        required:true,
-        unique:true
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true 
     },
-    fullName:{
-        firstName: {type: String, required: true},
-        lastName: {type: String, required:true}
+    fullName: {
+        firstName: { 
+            type: String, 
+            required: true 
+        },
+        lastName: { 
+            type: String 
+        }
     },
-    password:{
-        type:String
+    password: {
+        type: String,
+        required: true,
+        select: false 
+    },
+    status: {
+        type: String,
+        default: 'System Online'
+    },
+    image: {
+        type: String,
+        default: '' 
+    },
+    otp: {
+        type: Number
+    },
+    otpExpires: {
+        type: Date
     }
-},{
-    timestamps:true
-}
-)
+}, {
+    timestamps: true
+});
 
-const mongooseModel = mongoose.model('users',mongooseSchema)
+mongooseSchema.methods.getFullName = function() {
+    return `${this.fullName.firstName} ${this.fullName.lastName || ''}`.trim();
+};
 
-module.exports = mongooseModel
+const mongooseModel = mongoose.model('users', mongooseSchema);
+
+module.exports = mongooseModel;

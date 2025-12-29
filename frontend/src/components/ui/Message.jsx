@@ -29,11 +29,7 @@ const Message = ({ role, content }) => {
           <span className="name">{isAI ? 'NOVA_CORE' : 'IDENTITY_01'}</span>
         </div>
         
-        {isAI && (
-          <button className="copy-trigger" onClick={handleCopy}>
-            {copied ? <Check size={12} /> : <Copy size={12} />}
-          </button>
-        )}
+        {/* */}
       </div>
       
       {/* Content Layer */}

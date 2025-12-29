@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Added for navigation
+import { useNavigate } from 'react-router-dom'; 
 import { 
   Plus, 
   MessageSquare, 
@@ -16,32 +16,33 @@ import Button from '../ui/Button';
 import './Sidebar.scss';
 
 const Sidebar = ({ isOpen, setOpen, onNewChat, chats = [], activeChatId, setActiveChatId, onRenameChat }) => {
-  const navigate = useNavigate(); // Hook for strict redirect
+  const navigate = useNavigate(); 
   const [editingId, setEditingId] = useState(null);
   const [tempTitle, setTempTitle] = useState('');
 
-  // Strict Logout Logic
+  // 1. Strict Logout Logic
   const handleLogout = () => {
-    localStorage.removeItem('nova_auth_token'); // Clear the session
-    navigate('/login', { replace: true }); // Redirect and clear history stack
+    localStorage.removeItem('nova_auth_token'); 
+    navigate('/login', { replace: true }); 
   };
 
-  // Rename Start
+  // 2. Rename Start (State Setup)
   const startEditing = (e, chat) => {
-    e.stopPropagation(); // Parent click prevent karne ke liye
+    e.stopPropagation(); // Parent click (setActiveChatId) ko rokne ke liye
     setEditingId(chat.id);
-    setTempTitle(chat.title);
+    setTempTitle(chat.title || '');
   };
 
-  // Rename Save
-  const saveRename = (chatId) => {
+  // 3. Rename Save (Backend Handshake)
+  const saveRename = async (chatId) => {
     if (tempTitle.trim()) {
-      onRenameChat(chatId, tempTitle);
+      // Home.jsx ke renameChat function ko call karega jo API hit karega
+      await onRenameChat(chatId, tempTitle);
     }
     setEditingId(null);
   };
 
-  // Rename Cancel
+  // 4. Rename Cancel
   const cancelRename = (e) => {
     e.stopPropagation();
     setEditingId(null);
@@ -108,7 +109,10 @@ const Sidebar = ({ isOpen, setOpen, onNewChat, chats = [], activeChatId, setActi
                         autoFocus
                         value={tempTitle}
                         onChange={(e) => setTempTitle(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && saveRename(chat.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveRename(chat.id);
+                          if (e.key === 'Escape') cancelRename(e);
+                        }}
                         className="rename-input"
                       />
                       <div className="edit-actions">
@@ -133,14 +137,12 @@ const Sidebar = ({ isOpen, setOpen, onNewChat, chats = [], activeChatId, setActi
 
           <div className="sidebar-footer">
             <div className="persistence-links">
-              <Button variant="secondary" icon={Settings} className="footer-btn">
-                System Settings
-              </Button>
+              
               <Button 
                 variant="secondary" 
                 icon={LogOut} 
                 className="footer-btn logout"
-                onClick={handleLogout} // Attached Strict Logout logic
+                onClick={handleLogout}
               >
                 Terminate Session
               </Button>

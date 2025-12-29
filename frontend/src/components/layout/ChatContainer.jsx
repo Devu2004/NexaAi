@@ -1,22 +1,53 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUp, Loader2, Command } from 'lucide-react';
+import { ArrowUp, Loader2, Command, Lock, Copy, Check } from 'lucide-react';
 import Message from '../ui/Message';
 import Button from '../ui/Button'; 
+import api from '../../services/api'; 
 import './ChatContainer.scss';
 
-const ChatContainer = ({ chatData, userName }) => {
+const ChatContainer = ({ activeChatId, userName }) => {
   const [input, setInput] = useState('');
-  // Initialize local messages from props
-  const [messages, setMessages] = useState(chatData?.messages || []);
+  const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [copiedId, setCopiedId] = useState(null); 
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
 
   const displayName = userName || "Explorer";
   const firstName = displayName.split(' ')[0];
 
-  // Auto scroll to bottom
+  // 1. FETCH MESSAGE HISTORY (Persistence Fix)
+  // Jab bhi chat switch hogi, ye purane messages load karega
+  useEffect(() => {
+    const fetchMessages = async () => {
+      if (!activeChatId) {
+        setMessages([]);
+        return;
+      }
+      
+      try {
+        setIsLoading(true);
+        // Pehle UI saaf karo (Optional, but better UX)
+        setMessages([]); 
+        
+        const response = await api.get(`/chat/${activeChatId}/messages`);
+        
+        // Backend se aayi history ko state mein save karo
+        if (response.data && response.data.messages) {
+          setMessages(response.data.messages);
+        }
+      } catch (err) {
+        console.error("Neural Stream Sync Error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMessages();
+  }, [activeChatId]);
+
+  // Auto scroll logic
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
@@ -29,62 +60,95 @@ const ChatContainer = ({ chatData, userName }) => {
     }
   }, [input]);
 
-  const handleSend = () => {
-    if (!input.trim() || isLoading) return;
+  // Copy to Clipboard Utility
+  const handleCopy = (text, index) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(index);
+    setTimeout(() => setCopiedId(null), 2000); 
+  };
 
-    // User Message
-    const userMsg = { role: 'user', content: input };
-    setMessages(prev => [...prev, userMsg]);
+  // 2. SEND MESSAGE
+  const handleSend = async () => {
+    if (!input.trim() || isLoading || !activeChatId) return;
+
+    const userMsgContent = input;
     setInput('');
+    
+    // User message local state mein turant dalo
+    const userMsg = { role: 'user', content: userMsgContent };
+    setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
-    // AI Simulation (Later connect to your Node.js backend)
-    setTimeout(() => {
+    try {
+      // Backend ko message bhejo (Backend ise DB mein save bhi karega)
+      const response = await api.post('/chat/message', { 
+        chatId: activeChatId, 
+        content: userMsgContent 
+      });
+
+      // AI response state mein dalo
+      const aiResponse = { 
+        role: 'ai', 
+        content: response.data.aiContent 
+      };
+      
+      setMessages(prev => [...prev, aiResponse]);
+    } catch (err) {
+      console.error("Communication Error:", err);
       setMessages(prev => [...prev, { 
         role: 'ai', 
-        content: `Neural stream synchronized for ${chatData?.title || 'this session'}. How can I assist you further, ${firstName}?` 
+        content: "System Error: Failed to receive AI broadcast. Please check server." 
       }]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
-    <div className="obsidian-chat">
-      {/* 1. Message Viewport */}
+    <div className={`obsidian-chat ${!activeChatId ? 'state-locked' : 'state-active'}`}>
       <div className="broadcast-stream custom-scroll">
         <AnimatePresence mode="popLayout">
-          {messages.length === 0 ? (
-            <motion.div 
-              initial={{ opacity: 0, y: 15 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="stream-intro"
-            >
+          {!activeChatId ? (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="stream-placeholder">
+              <div className="lock-notice">
+                <div className="lock-icon-wrapper"><Lock size={32} /></div>
+                <h3>Neural Stream Locked</h3>
+                <p>Select a broadcast channel from the sidebar to establish a connection.</p>
+              </div>
+            </motion.div>
+          ) : messages.length === 0 && !isLoading ? (
+            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="stream-intro">
               <div className="welcome-spine">
                 <span className="system-tag">SESSION_ACTIVE</span>
                 <h1 className="user-greet">Hi {firstName},</h1>
-                
                 <p className="editorial-quote">
-                  Initiating {chatData?.title || 'New Stream'}... <br/>
-                  What's on your mood today?
+                  Stream Secured. <br/>
+                  Awaiting Neural Input...
                 </p>
-
                 <div className="mood-indicator">
                   <div className="dot pulse"></div>
-                  <span>Ready for the mission?</span>
+                  <span>Ready for mission</span>
                 </div>
               </div>
             </motion.div>
           ) : (
             <div className="message-list">
               {messages.map((msg, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
+                <motion.div 
+                  key={i} 
+                  className="message-wrapper"
+                  initial={{ opacity: 0, y: 10 }} 
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
                 >
-                  <Message {...msg} />
+                  <Message role={msg.role} content={msg.content} />
+                  
+                  {/* Clean Copy Button Design */}
+                  <button 
+                    className={`copy-btn ${copiedId === i ? 'copied' : ''}`}
+                    onClick={() => handleCopy(msg.content, i)}
+                  >
+                    {copiedId === i ? <Check size={14} /> : <Copy size={14} />}
+                  </button>
                 </motion.div>
               ))}
               
@@ -100,15 +164,15 @@ const ChatContainer = ({ chatData, userName }) => {
         </AnimatePresence>
       </div>
 
-      {/* 2. Input Control (Docked) */}
-      <footer className="command-dock">
+      <footer className={`command-dock ${!activeChatId ? 'is-locked' : ''}`}>
         <div className="command-wrapper">
           <div className="input-field">
             <textarea 
               ref={textareaRef}
-              placeholder={`Command Nova AI, ${firstName}...`}
+              placeholder={activeChatId ? `Command Nova AI...` : "Neural Connection: INACTIVE"}
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              disabled={!activeChatId || isLoading}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -118,19 +182,14 @@ const ChatContainer = ({ chatData, userName }) => {
               rows={1}
             />
           </div>
-          
           <div className="input-controls">
-            <div className="shortcut-hint desktop-only">
-              <Command size={12} />
-              <span>+ Enter to broadcast</span>
-            </div>
-            
+            <div className="shortcut-hint desktop-only"><Command size={12} /><span>+ Enter to broadcast</span></div>
             <Button 
               variant="primary"
-              icon={isLoading ? Loader2 : ArrowUp}
+              icon={isLoading ? Loader2 : (activeChatId ? ArrowUp : Lock)}
               onClick={handleSend}
-              disabled={!input.trim() || isLoading}
-              className={`send-trigger ${input.trim() ? 'active' : ''} ${isLoading ? 'loading-active' : ''}`}
+              disabled={!input.trim() || isLoading || !activeChatId}
+              className={`send-trigger ${input.trim() ? 'active' : ''}`}
             />
           </div>
         </div>

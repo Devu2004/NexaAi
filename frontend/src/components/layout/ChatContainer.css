@@ -4,7 +4,11 @@
   flex-direction: column;
   background-color: #080808;
   position: relative;
+  /* ================= NEW: LOCKED STATE VISUALS ================= */
   /* ================= COMMAND DOCK ================= */
+}
+.obsidian-chat.state-locked .broadcast-stream {
+  background-image: radial-gradient(circle at center, rgba(16, 163, 127, 0.02) 0%, transparent 70%);
 }
 .obsidian-chat .broadcast-stream {
   flex: 1;
@@ -12,6 +16,7 @@
   padding: 0 16px;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  /* ================= NEW: STREAM PLACEHOLDER (LOCKED) ================= */
 }
 .obsidian-chat .broadcast-stream::-webkit-scrollbar {
   display: none;
@@ -20,6 +25,50 @@
   .obsidian-chat .broadcast-stream {
     padding: 0 24px;
   }
+}
+.obsidian-chat .broadcast-stream .stream-placeholder {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.obsidian-chat .broadcast-stream .stream-placeholder .lock-notice {
+  max-width: 320px;
+  padding: 40px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.obsidian-chat .broadcast-stream .stream-placeholder .lock-notice .lock-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  color: #525252;
+  opacity: 0.5;
+}
+.obsidian-chat .broadcast-stream .stream-placeholder .lock-notice h3 {
+  color: #fff;
+  font-size: 1.25rem;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+  font-weight: 600;
+}
+.obsidian-chat .broadcast-stream .stream-placeholder .lock-notice p {
+  color: #525252;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0;
 }
 .obsidian-chat .broadcast-stream .stream-intro {
   height: 80%;
@@ -66,6 +115,11 @@
   line-height: 1.6;
   opacity: 0.8;
   max-width: 80%;
+}
+.obsidian-chat .broadcast-stream .stream-intro .welcome-spine .editorial-quote .id-highlight {
+  color: #10a37f;
+  font-family: monospace;
+  font-size: 0.9rem;
 }
 .obsidian-chat .broadcast-stream .stream-intro .welcome-spine .mood-indicator {
   display: flex;
@@ -115,6 +169,21 @@
   left: 0;
   right: 0;
   z-index: 100;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+  /* ================= NEW: COMMAND DOCK LOCKED STATE ================= */
+}
+.obsidian-chat .command-dock.is-locked {
+  opacity: 0.7;
+}
+.obsidian-chat .command-dock.is-locked .command-wrapper {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.obsidian-chat .command-dock.is-locked .command-wrapper textarea {
+  cursor: not-allowed;
+  filter: blur(0.5px);
 }
 .obsidian-chat .command-dock .command-wrapper {
   width: 100%;
@@ -237,4 +306,33 @@
   100% {
     transform: scale(1);
   }
+}
+.message-wrapper {
+  position: relative;
+}
+.message-wrapper .copy-btn {
+  position: absolute;
+  right: -40px;
+  top: 10px;
+  padding: 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #666;
+  opacity: 0;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.message-wrapper .copy-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #10a37f;
+}
+.message-wrapper .copy-btn.copied {
+  color: #10a37f;
+  border-color: #10a37f;
+  opacity: 1;
+}
+.message-wrapper:hover .copy-btn {
+  opacity: 1;
+  right: 0px;
 }/*# sourceMappingURL=ChatContainer.css.map */

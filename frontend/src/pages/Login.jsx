@@ -1,23 +1,50 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Fingerprint } from 'lucide-react';
+import { ArrowRight, Fingerprint, Loader2 } from 'lucide-react';
 import PageWrapper from '../components/layout/PageWrapper';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
+import api from '../services/api'; // Axios instance import kiya
 import './Auth.scss';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // SIMULATION: Token save karke Home par bhej rahe hain
-    // Backend connect hone par yahan axios.post call aayegi
-    localStorage.setItem('nova_auth_token', 'session_active_node_verified');
-    navigate('/');
+    setIsLoading(true);
+    setError(''); // Purana error clear karo
+
+    try {
+      // 1. Real Backend API Call
+      const response = await api.post('/auth/login/user', { 
+        email, 
+        password 
+      });
+
+      // 2. Token Save karna (Backend token response.data.token mein bhej raha hai)
+      if (response.data.token) {
+        localStorage.setItem('nova_auth_token', response.data.token);
+      } else {
+        // Agar cookie base auth hai toh dummy token set kar do route protection ke liye
+        localStorage.setItem('nova_auth_token', 'verified_session');
+      }
+
+      // 3. Success! Home par bhej do
+      navigate('/');
+    } catch (err) {
+      // 4. Error Handling
+      const errorMessage = err.response?.data?.message || "Neural connection refused. Check credentials.";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -38,6 +65,17 @@ const Login = () => {
             <p>Synchronize your node with the Nova Core stream.</p>
           </header>
 
+          {/* Error Message Display */}
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }} 
+              animate={{ opacity: 1, x: 0 }}
+              className="auth-error-chip"
+            >
+              {error}
+            </motion.div>
+          )}
+
           <form className="auth-form" onSubmit={handleLogin}>
             <Input 
               label="Neural Address" 
@@ -46,6 +84,7 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isLoading}
             />
             
             <div className="password-field-wrapper">
@@ -56,6 +95,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                disabled={isLoading}
               />
               <div className="field-action">
                 <Link to="/forgot-password" title="Recover Access" className="editorial-link small">
@@ -64,8 +104,20 @@ const Login = () => {
               </div>
             </div>
             
-            <Button variant="primary" type="submit" className="auth-submit" icon={ArrowRight}>
-              Authorized Access
+            <Button 
+              variant="primary" 
+              type="submit" 
+              className="auth-submit" 
+              icon={isLoading ? null : ArrowRight}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <span className="loading-flex">
+                  <Loader2 className="spinner" size={18} /> Verifying...
+                </span>
+              ) : (
+                "Authorized Access"
+              )}
             </Button>
           </form>
 

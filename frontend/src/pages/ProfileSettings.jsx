@@ -3,21 +3,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Save, X, ShieldCheck, Loader2 } from 'lucide-react';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
+import api from '../services/api'; // Backend API service
 import './ProfileSettings.scss';
 
 const ProfileSettings = ({ isOpen, onClose, user, onUpdate }) => {
-  const [name, setName] = useState(user.name);
-  const [status, setStatus] = useState(user.status || 'System Online');
-  const [preview, setPreview] = useState(user.image || null);
+  const [name, setName] = useState(user?.name || '');
+  const [status, setStatus] = useState(user?.status || 'System Online');
+  const [preview, setPreview] = useState(user?.image || null);
   const [isSyncing, setIsSyncing] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Sync state with user prop when modal opens
   useEffect(() => {
-    if (isOpen) {
-      setName(user.name);
-      setStatus(user.status);
-      setPreview(user.image);
+    if (isOpen && user) {
+      setName(user.name || '');
+      setStatus(user.status || 'System Online');
+      setPreview(user.image || null);
     }
   }, [isOpen, user]);
 
@@ -25,32 +25,39 @@ const ProfileSettings = ({ isOpen, onClose, user, onUpdate }) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result);
+      reader.onloadend = () => setPreview(reader.result); // Base64 preview
       reader.readAsDataURL(file);
     }
   };
 
+  // ================= BACKEND LINKING LOGIC =================
   const handleSync = async () => {
+    if (!name.trim()) return;
     setIsSyncing(true);
     
-    // Simulate API Call / Persistence Logic
-    const updatedUser = {
-      ...user,
-      name: name,
-      status: status,
-      image: preview
-    };
+    try {
+      const response = await api.put('/user/update-profile', {
+        name: name,
+        status: status,
+        image: preview // Sending Base64 or Image URL
+      });
 
-    // 1. Save to LocalStorage for persistence on reload
-    localStorage.setItem('user_profile', JSON.stringify(updatedUser));
+      // Update parent state with fresh data from DB
+      if (response.data.user) {
+        onUpdate(response.data.user);
+      } else {
+        onUpdate({ ...user, name, status, image: preview });
+      }
 
-    // 2. Update Parent State
-    setTimeout(() => {
-      onUpdate(updatedUser);
-      setIsSyncing(false);
       onClose();
-    }, 800); // Chhota sa delay professional feel ke liye
+    } catch (err) {
+      console.error("Profile Sync Failed:", err);
+      alert("Failed to update identity. Check connection.");
+    } finally {
+      setIsSyncing(false);
+    }
   };
+  // =========================================================
 
   if (!isOpen) return null;
 
@@ -122,9 +129,9 @@ const ProfileSettings = ({ isOpen, onClose, user, onUpdate }) => {
               disabled={isSyncing}
             >
               {isSyncing ? (
-                <><Loader2 size={18} className="spin" /> Updating...</>
+                <><Loader2 size={18} className="spin" /> Syncing...</>
               ) : (
-                <><Save size={18} /> Sync Changes</>
+                <><Save size={18} /> Save Identity</>
               )}
             </Button>
           </div>
