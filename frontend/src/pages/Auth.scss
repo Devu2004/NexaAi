@@ -1,8 +1,11 @@
 @use '../styles/variables' as *;
 @use '../styles/mixins' as *;
 
-// Local Variable for Auth Accent
-$auth-accent: #10a37f; 
+$auth-accent: #10a37f;
+
+/* ============================= */
+/* BASE AUTH (LOGIN + REGISTER) */
+/* ============================= */
 
 .auth-obsidian {
   min-height: 100dvh;
@@ -12,10 +15,8 @@ $auth-accent: #10a37f;
   justify-content: center;
   align-items: center;
   padding: 40px 20px;
-  overflow-y: auto;
   position: relative;
 
-  // Background Ambient Effect
   &::before {
     content: '';
     position: absolute;
@@ -34,23 +35,25 @@ $auth-accent: #10a37f;
     display: flex;
     flex-direction: column;
     z-index: 1;
+    overflow: hidden;
+    min-height: 450px;
 
     .auth-brand {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 16px;
-      margin-bottom: 28px;
+      margin-bottom: 20px;
 
-      .brand-symbol { 
-        color: #fff; 
+      .brand-symbol {
+        color: #fff;
         filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
       }
 
-      .brand-tag { 
-        font-size: 0.6rem; 
-        letter-spacing: 4px; 
-        color: $text-dim; 
+      .brand-tag {
+        font-size: 0.6rem;
+        letter-spacing: 4px;
+        color: $text-dim;
         text-transform: uppercase;
         font-weight: 700;
       }
@@ -60,18 +63,18 @@ $auth-accent: #10a37f;
       text-align: center;
       margin-bottom: 30px;
 
-      h1 { 
-        font-size: 2.2rem; 
-        letter-spacing: -1.5px; 
-        font-weight: 800; 
-        margin-bottom: 12px; 
+      h1 {
+        font-size: 2.2rem;
+        letter-spacing: -1.5px;
+        font-weight: 800;
+        margin-bottom: 12px;
         color: #fff;
       }
 
-      p { 
-        font-size: 0.9rem; 
-        color: $text-secondary; 
-        line-height: 1.6; 
+      p {
+        font-size: 0.9rem;
+        color: $text-secondary;
+        line-height: 1.6;
         max-width: 90%;
         margin: 0 auto;
       }
@@ -80,30 +83,31 @@ $auth-accent: #10a37f;
     .auth-form {
       display: flex;
       flex-direction: column;
-      gap: 12px; // Minimal gap for modern look
+      gap: 12px;
 
       .form-row {
         display: flex;
         flex-direction: column;
-        gap: 0;
-        
+
         @media (min-width: 600px) {
           flex-direction: row;
           gap: 16px;
-          > div { flex: 1; }
+
+          > div {
+            flex: 1;
+          }
         }
       }
 
-      // --- New: Password Wrapper for Forgot Link ---
       .password-field-wrapper {
         position: relative;
-        
+
         .field-action {
           position: absolute;
           top: 0;
           right: 0;
           z-index: 10;
-          
+
           .editorial-link.small {
             font-size: 0.65rem;
             text-transform: uppercase;
@@ -112,9 +116,9 @@ $auth-accent: #10a37f;
             font-weight: 700;
             text-decoration: none;
             @include transition-snappy;
-            
-            &:hover { 
-              color: $auth-accent; 
+
+            &:hover {
+              color: $auth-accent;
               transform: translateY(-1px);
             }
           }
@@ -122,7 +126,6 @@ $auth-accent: #10a37f;
       }
 
       .auth-submit {
-        // margin-top: 3px;
         width: 100%;
         padding: 16px;
         font-weight: 800;
@@ -130,7 +133,7 @@ $auth-accent: #10a37f;
         text-transform: uppercase;
         font-size: 0.8rem;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        
+
         &:hover {
           transform: translateY(-2px);
           box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
@@ -142,10 +145,9 @@ $auth-accent: #10a37f;
       margin-top: 20px;
       text-align: center;
 
-      p { 
-        font-size: 0.85rem; 
+      p {
+        font-size: 0.85rem;
         color: $text-dim;
-        letter-spacing: 0.3px;
       }
 
       .editorial-link {
@@ -154,7 +156,7 @@ $auth-accent: #10a37f;
         font-weight: 700;
         position: relative;
         text-decoration: none;
-        
+
         &::after {
           content: '';
           position: absolute;
@@ -163,17 +165,57 @@ $auth-accent: #10a37f;
           width: 100%;
           height: 1px;
           background: rgba(255, 255, 255, 0.2);
-          transition: background 0.3s ease;
         }
 
-        &:hover::after { 
-          background: #fff; 
+        &:hover::after {
+          background: #fff;
         }
       }
     }
   }
 }
-// Resend/Restart text style
+
+
+.auth-obsidian.custom-scroll {
+  height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 60px 20px 80px; 
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; 
+
+  .auth-spine {
+    margin-top: 20px; 
+    overflow: visible;
+    min-height: unset;
+  }
+
+  /* Obsidian scrollbar */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(16, 163, 127, 0.35);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 163, 127, 0.6);
+  }
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(16, 163, 127, 0.4) transparent;
+}
+
+
+
+
 .resend-text {
   font-size: 0.7rem;
   color: $text-dim;
@@ -188,10 +230,4 @@ $auth-accent: #10a37f;
     color: #fff;
     text-decoration: underline;
   }
-}
-
-// Ensure smooth height transitions
-.auth-spine {
-  overflow: hidden;
-  min-height: 450px; // Consistency during transitions
 }
