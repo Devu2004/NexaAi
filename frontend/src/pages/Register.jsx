@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { UserPlus, Zap, Loader2, ShieldCheck } from 'lucide-react';
+import { UserPlus, Zap, Loader2 } from 'lucide-react';
 import PageWrapper from '../components/layout/PageWrapper';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
-import api from '../services/api'; // Axios instance import kiya
+import api from '../services/api'; 
 import './Auth.scss';
 
 const Register = () => {
@@ -29,7 +29,6 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
-    // 1. Password Match Validation
     if (formData.password !== formData.confirmPassword) {
       setError("Neural phrases do not match. Re-verify access codes.");
       return;
@@ -38,9 +37,7 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      // 2. Real Backend API Call 
-      // Payload structure matched with your userModel
-      const response = await api.post('/auth/register/user', {
+      await api.post('/auth/register/user', {
         fullName: {
           firstName: formData.firstName,
           lastName: formData.lastName
@@ -49,12 +46,10 @@ const Register = () => {
         password: formData.password
       });
 
-      // 3. Success Feedback
       alert("Node successfully initialized! Synchronizing identity...");
       navigate('/login');
 
     } catch (err) {
-      // 4. Backend Error Handling
       const errorMessage = err.response?.data?.message || "Registration protocol failed. Node rejected.";
       setError(errorMessage);
     } finally {
@@ -64,23 +59,23 @@ const Register = () => {
 
   return (
     <PageWrapper>
-      <div className="auth-obsidian">
+      {/* Scrollable container fix */}
+      <div className="auth-obsidian custom-scroll">
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           className="auth-spine"
         >
           <div className="auth-brand">
-            <Zap size={28} className="brand-symbol" />
+            <Zap size={24} className="brand-symbol" />
             <span className="brand-tag">NODE_REGISTRATION_V1</span>
           </div>
 
           <header className="auth-header">
             <h1>Create Identity.</h1>
-            <p>Initialize your neural node to join the editorial network.</p>
+            <p>Initialize your node to join the network.</p>
           </header>
 
-          {/* Error Message Chip */}
           {error && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
@@ -92,7 +87,8 @@ const Register = () => {
           )}
 
           <form className="auth-form" onSubmit={handleRegister}>
-            <div className="form-row">
+            {/* Mobile optimized row */}
+            <div className="form-row responsive-grid">
               <Input 
                 label="First Name" 
                 placeholder="John" 
@@ -141,21 +137,24 @@ const Register = () => {
               disabled={isLoading}
             />
             
-            <Button 
-              variant="primary" 
-              type="submit" 
-              className="auth-submit" 
-              icon={isLoading ? null : UserPlus}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <span className="loading-flex">
-                  <Loader2 className="spinner" size={18} /> Initializing...
-                </span>
-              ) : (
-                "Initialize Node"
-              )}
-            </Button>
+            {/* Action Button - Space added for mobile */}
+            <div className="auth-action-zone">
+                <Button 
+                variant="primary" 
+                type="submit" 
+                className="auth-submit" 
+                icon={isLoading ? null : UserPlus}
+                disabled={isLoading}
+                >
+                {isLoading ? (
+                    <span className="loading-flex">
+                    <Loader2 className="spinner" size={18} /> Initializing...
+                    </span>
+                ) : (
+                    "Initialize Node"
+                )}
+                </Button>
+            </div>
           </form>
 
           <footer className="auth-footer">
