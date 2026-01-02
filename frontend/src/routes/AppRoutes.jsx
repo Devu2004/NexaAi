@@ -5,13 +5,25 @@ import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Home from '../pages/Home';
 import ForgotPassword from '../pages/ForgotPassword';
-// --- PROTECTED ROUTE LOGIC ---
-// Agar localStorage mein token nahi hai, toh user ko Login par redirect karega
+
+// --- 1. PROTECTED ROUTE LOGIC ---
+// Sirf logged-in users ke liye (Token check)
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('nova_auth_token');
   
   if (!token) {
     return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// --- 2. PUBLIC ROUTE LOGIC ---
+// Logged-in users ko Auth pages (Login/Register) par jane se rokega
+const PublicRoute = ({ children }) => {
+  const token = localStorage.getItem('nova_auth_token');
+  
+  if (token) {
+    return <Navigate to="/" replace />;
   }
   return children;
 };
@@ -23,7 +35,7 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         
-        {/* PROTECTED: Sirf login ke baad dikhega */}
+        {/* PROTECTED: Dashboard sirf login ke baad khulega */}
         <Route 
           path="/" 
           element={
@@ -33,11 +45,28 @@ const AnimatedRoutes = () => {
           } 
         />
 
-        {/* PUBLIC: Sabke liye open hai */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        {/* PUBLIC: Login/Register sirf tab dikhenge jab user logged-out ho */}
+        <Route 
+          path="/login" 
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          } 
+        />
+        
+        <Route 
+          path="/register" 
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          } 
+        />
+
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        {/* FALLBACK: Galat URL par seedha Home (jo login par bhej dega) */}
+
+        {/* FALLBACK: Galat URL par seedha Home (jo redirect handle kar lega) */}
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
