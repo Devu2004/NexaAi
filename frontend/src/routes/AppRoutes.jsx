@@ -8,28 +8,21 @@ import Register from '../pages/Register';
 import Home from '../pages/Home';
 import ForgotPassword from '../pages/ForgotPassword';
 
-/**
- * 1. PROTECTED ROUTE
- * Sirf login karne wale users Dashboard (Home) dekh payenge.
- */
+// --- PROTECTED ROUTE ---
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('nova_auth_token');
   
-  // Agar token nahi hai, to login page par bhej do
   if (!token) {
+    // replace={true} history stack ko clean rakhta hai
     return <Navigate to="/login" replace />;
   }
   return children;
 };
 
-/**
- * 2. PUBLIC ROUTE
- * Agar user pehle se logged-in hai, to use Login/Register page nahi dikhna chahiye.
- */
+// --- PUBLIC ROUTE ---
 const PublicRoute = ({ children }) => {
   const token = localStorage.getItem('nova_auth_token');
   
-  // Agar token hai, to seedha Home page par redirect karo
   if (token) {
     return <Navigate to="/" replace />;
   }
@@ -40,11 +33,10 @@ const AnimatedRoutes = () => {
   const location = useLocation();
   
   return (
-    // mode="wait" ensures current page finishes exit animation before next one enters
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         
-        {/* HOME (Protected) */}
+        {/* HOME: Sirf login users ke liye */}
         <Route 
           path="/" 
           element={
@@ -54,7 +46,7 @@ const AnimatedRoutes = () => {
           } 
         />
 
-        {/* AUTH ROUTES (Public Only) */}
+        {/* AUTH: Sirf logged-out users ke liye */}
         <Route 
           path="/login" 
           element={
@@ -68,14 +60,14 @@ const AnimatedRoutes = () => {
           path="/register" 
           element={
             <PublicRoute>
-              <Register  />
+              <Register />
             </PublicRoute>
           } 
         />
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* 404/FALLBACK */}
+        {/* 404 Redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>

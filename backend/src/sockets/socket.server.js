@@ -1,6 +1,5 @@
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
-const cookie = require("cookie");
 const userModel = require("../models/user.model");
 const messageModel = require("../models/message.model");
 const aiServices = require("../services/ai.service");
@@ -10,39 +9,41 @@ const { createMemory, queryMemory } = require("../services/vector.service");
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: "*",
+      origin: [
+        "http://localhost:5173",
+        "https://YOUR_FRONTEND.vercel.app",
+      ],
       credentials: true,
     },
   });
 
-  // 🔐 AUTH MIDDLEWARE
+  // 🔐 SOCKET AUTH (FIXED)
   io.use(async (socket, next) => {
     try {
-      const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
-      if (!cookies.token) return next(new Error("Token missing"));
+      const token = socket.handshake.auth?.token;
+      if (!token) return next(new Error("Token missing"));
 
-      const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await userModel.findById(decoded.id);
+
       if (!user) return next(new Error("User not found"));
 
       socket.user = user;
       next();
     } catch (err) {
+      console.error("SOCKET AUTH ERROR:", err.message);
       next(new Error("Invalid token"));
     }
   });
 
-  // 🔌 SOCKET CONNECTION
   io.on("connection", (socket) => {
-    console.log(`✅ User connected: ${socket.user._id}`);
+    console.log("✅ Socket connected:", socket.user._id.toString());
 
     socket.on("ai-message", async ({ chat, content }) => {
       try {
-        /**
-         * STEP 1: Parallel Tasks
-         * 1. Save User Message to Mongoose
-         * 2. Generate Vectors for RAG
-         */
+        if (!chat || !content) return;
+
+        // 1️⃣ Save user message + generate vector
         const [userMessage, vectors] = await Promise.all([
           messageModel.create({
             chat,
@@ -53,23 +54,15 @@ function initSocketServer(httpServer) {
           generateVector(content),
         ]);
 
-        if (!vectors || !Array.isArray(vectors)) {
-          throw new Error("Vector generation failed");
-        }
-
-        /**
-         * STEP 2: Fetch Context
-         * 1. Query Pinecone for relevant memories
-         * 2. Get recent Mongoose chat history (excluding the message we just saved to avoid duplicates)
-         */
-        const [memories, rawHistory] = await Promise.all([
+        // 2️⃣ Fetch memory + recent history
+        const [memories, history] = await Promise.all([
           queryMemory({
             queryVector: vectors,
             limit: 3,
             metadata: { chat: chat.toString() },
           }),
           messageModel
-            .find({ chat, _id: { $ne: userMessage._id } }) // Exclude current message
+            .find({ chat })
             .sort({ createdAt: -1 })
             .limit(5)
             .lean(),
@@ -80,72 +73,61 @@ function initSocketServer(httpServer) {
           .filter(Boolean)
           .join("\n");
 
-        const chatHistory = rawHistory.reverse().map((msg) => ({
-          role: msg.role === "model" ? "assistant" : "user",
-          content: msg.content,
-        }));
-
-        /**
-         * STEP 3: AI Prompt Construction
-         */
-        const messagesWithContext = [
+        const messages = [
           {
             role: "system",
             content: `
-You are Nexa AI, a smart and friendly developer assistant. 
-Reply in the language the user uses (English/Hindi/Hinglish).
-
-${memoryContext ? `Relevant context from past: ${memoryContext}` : ""}
-
-Instruction: Use context only if relevant. Be concise and helpful.`
+You are Nexa AI, a smart developer assistant.
+Reply in user's language (English/Hindi/Hinglish).
+${memoryContext ? `Context:\n${memoryContext}` : ""}
+Be concise.
+            `,
           },
-          ...chatHistory,
-          { role: "user", content: content }, // Add current message at the end
+          ...history.reverse().map((m) => ({
+            role: m.role === "model" ? "assistant" : "user",
+            content: m.content,
+          })),
+          { role: "user", content },
         ];
 
-        /**
-         * STEP 4: Generate & Store AI Response
-         */
-        const aiResponse = await aiServices.genrateResponse(messagesWithContext);
+        // 3️⃣ AI response
+        const aiReply = await aiServices.genrateResponse(messages);
 
-        const savedAiMsg = await messageModel.create({
+        const aiMessage = await messageModel.create({
           chat,
           user: socket.user._id,
-          content: aiResponse,
+          content: aiReply,
           role: "model",
         });
 
-        /**
-         * STEP 5: Async Pinecone Store (Don't await to keep socket fast)
-         */
+        // 4️⃣ Store memory async
         createMemory({
           vectors,
           messageId: userMessage._id.toString(),
           metadata: {
             chat: chat.toString(),
             text: content,
-            role: "user",
           },
-        }).catch((err) => console.error("Pinecone storage error:", err));
+        }).catch(console.error);
 
-        // Emit final response
+        // 5️⃣ Emit response
         socket.emit("ai-response", {
           chat,
-          content: aiResponse,
-          messageId: savedAiMsg._id
+          content: aiReply,
+          messageId: aiMessage._id,
         });
 
-      } catch (error) {
-        console.error("AI SOCKET ERROR:", error.message);
+      } catch (err) {
+        console.error("AI SOCKET ERROR:", err);
         socket.emit("ai-response", {
           chat,
-          content: "⚠️ Sorry, I'm having trouble connecting right now.",
+          content: "⚠️ AI is unavailable right now",
         });
       }
     });
 
     socket.on("disconnect", () => {
-      console.log(`❌ User disconnected: ${socket.user._id}`);
+      console.log("❌ Socket disconnected:", socket.user._id.toString());
     });
   });
 }
