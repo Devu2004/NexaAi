@@ -2,6 +2,7 @@ const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.model");
 const messageModel = require("../models/message.model");
+const chatModel = require("../models/chat.model");
 const aiServices = require("../services/ai.service");
 const { generateVector } = require("../services/embedding.service");
 const { createMemory, queryMemory } = require("../services/vector.service");
@@ -9,15 +10,14 @@ const { createMemory, queryMemory } = require("../services/vector.service");
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: [
-        "http://localhost:5173",
-        "https://YOUR_FRONTEND.vercel.app",
-      ],
+      origin: ["http://localhost:5173"],
       credentials: true,
     },
   });
 
-  // 🔐 SOCKET AUTH (FIXED)
+  /* =========================
+     🔐 SOCKET AUTH
+  ========================= */
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth?.token;
@@ -31,30 +31,58 @@ function initSocketServer(httpServer) {
       socket.user = user;
       next();
     } catch (err) {
-      console.error("SOCKET AUTH ERROR:", err.message);
       next(new Error("Invalid token"));
     }
   });
 
+  /* =========================
+     🔌 CONNECTION
+  ========================= */
   io.on("connection", (socket) => {
     console.log("✅ Socket connected:", socket.user._id.toString());
 
-    socket.on("ai-message", async ({ chat, content }) => {
+    /* =========================
+       📩 AI MESSAGE
+    ========================= */
+    socket.on("ai-message", async (payload) => {
       try {
+        const { chat, content } = payload || {};
         if (!chat || !content) return;
 
-        // 1️⃣ Save user message + generate vector
-        const [userMessage, vectors] = await Promise.all([
-          messageModel.create({
-            chat,
-            user: socket.user._id,
-            content,
-            role: "user",
-          }),
-          generateVector(content),
-        ]);
+        /* =========================
+           1️⃣ VALIDATE CHAT
+        ========================= */
+        const chatDoc = await chatModel.findById(chat);
+        if (!chatDoc) {
+          console.log("❌ Chat not found");
+          return;
+        }
 
-        // 2️⃣ Fetch memory + recent history
+        /* =========================
+           2️⃣ USER MESSAGE SAVE
+           (Message Model + Chat Array)
+        ========================= */
+        const vectors = await generateVector(content);
+
+        // ✅ Message collection (AI ke liye)
+        const userMessage = await messageModel.create({
+          chat,
+          user: socket.user._id,
+          content,
+          role: "user",
+        });
+
+        // ✅ Chat.messages array (UI ke liye)
+        chatDoc.messages.push({
+          role: "user",
+          content,
+        });
+        chatDoc.updatedAt = new Date();
+        await chatDoc.save();
+
+        /* =========================
+           3️⃣ MEMORY + HISTORY
+        ========================= */
         const [memories, history] = await Promise.all([
           queryMemory({
             queryVector: vectors,
@@ -64,7 +92,7 @@ function initSocketServer(httpServer) {
           messageModel
             .find({ chat })
             .sort({ createdAt: -1 })
-            .limit(5)
+            .limit(6)
             .lean(),
         ]);
 
@@ -73,6 +101,9 @@ function initSocketServer(httpServer) {
           .filter(Boolean)
           .join("\n");
 
+        /* =========================
+           4️⃣ AI PROMPT
+        ========================= */
         const messages = [
           {
             role: "system",
@@ -87,12 +118,14 @@ Be concise.
             role: m.role === "model" ? "assistant" : "user",
             content: m.content,
           })),
-          { role: "user", content },
         ];
 
-        // 3️⃣ AI response
+        /* =========================
+           5️⃣ AI RESPONSE
+        ========================= */
         const aiReply = await aiServices.genrateResponse(messages);
 
+        // ✅ Message collection
         const aiMessage = await messageModel.create({
           chat,
           user: socket.user._id,
@@ -100,7 +133,17 @@ Be concise.
           role: "model",
         });
 
-        // 4️⃣ Store memory async
+        // ✅ Chat.messages array
+        chatDoc.messages.push({
+          role: "ai", // frontend expects "ai"
+          content: aiReply,
+        });
+        chatDoc.updatedAt = new Date();
+        await chatDoc.save();
+
+        /* =========================
+           6️⃣ VECTOR MEMORY STORE
+        ========================= */
         createMemory({
           vectors,
           messageId: userMessage._id.toString(),
@@ -108,9 +151,11 @@ Be concise.
             chat: chat.toString(),
             text: content,
           },
-        }).catch(console.error);
+        }).catch(() => {});
 
-        // 5️⃣ Emit response
+        /* =========================
+           7️⃣ EMIT TO FRONTEND
+        ========================= */
         socket.emit("ai-response", {
           chat,
           content: aiReply,
@@ -118,10 +163,10 @@ Be concise.
         });
 
       } catch (err) {
-        console.error("AI SOCKET ERROR:", err);
+        console.log("❌ AI SOCKET ERROR:", err.message);
         socket.emit("ai-response", {
-          chat,
-          content: "⚠️ AI is unavailable right now",
+          chat: payload?.chat,
+          content: "⚠️ AI unavailable",
         });
       }
     });

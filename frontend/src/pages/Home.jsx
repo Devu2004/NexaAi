@@ -66,7 +66,7 @@ const Home = () => {
       setActiveChatId(newChat.id); 
       if (window.innerWidth < 1024) setSidebarOpen(false);
     } catch (err) {
-      alert("Failed to initialize new neural stream.");
+      alert("Failed to initialize new neural stream.",err);
     }
   };
 
@@ -77,7 +77,7 @@ const Home = () => {
         prevChats.map(chat => chat.id === chatId ? { ...chat, title: newTitle } : chat)
       );
     } catch (err) {
-      alert("Rename protocol failed.");
+      alert("Rename protocol failed.",err);
     }
   };
 

@@ -31,6 +31,8 @@ const Login = () => {
       // 2. Token Save karna (Backend token response.data.token mein bhej raha hai)
       if (response.data.token) {
         localStorage.setItem('nova_auth_token', response.data.token);
+        console.log(localStorage.getItem('nova_auth_token'));
+        
       } else {
         // Agar cookie base auth hai toh dummy token set kar do route protection ke liye
         localStorage.setItem('nova_auth_token', 'verified_session');

@@ -1,93 +1,116 @@
 const chatModel = require('../models/chat.model');
+const messageModel = require('../models/message.model');
 const aiService = require('../services/ai.service');
 
 // --- 1. CREATE NEW CHAT ---
 async function createChat(req, res) {
-    try {
-        const { title } = req.body;
-        const userId = req.user.id;
-        const newChat = new chatModel({ 
-            title: title || "New Broadcast", 
-            user: userId,
-            messages: [] // Khali messages array se shuru karo
-        });
-        await newChat.save();
-        res.status(201).json({ message: "Stream Initialized", chat: newChat });
-    } catch (error) {
-        console.error("Create Chat Error:", error);
-        res.status(500).json({ message: "Error creating chat" });
-    }
+  try {
+    const userId = req.user.id;
+    const { title } = req.body;
+
+    const chat = await chatModel.create({
+      user: userId,
+      title: title || 'New Broadcast'
+    });
+
+    res.status(201).json({ chat });
+  } catch (err) {
+    res.status(500).json({ message: 'Chat create failed' });
+  }
 }
 
-// --- 2. GET ALL CHATS (Sidebar ke liye) ---
+// --- 2. GET ALL CHATS ---
 async function getAllChats(req, res) {
-    try {
-        const userId = req.user.id;
-        const chats = await chatModel.find({ user: userId }).sort({ updatedAt: -1 });
-        res.status(200).json({ chats });
-    } catch (error) {
-        res.status(500).json({ message: "Error fetching chats" });
-    }
+  try {
+    const chats = await chatModel
+      .find({ user: req.user.id })
+      .sort({ updatedAt: -1 });
+
+    res.json({ chats });
+  } catch {
+    res.status(500).json({ message: 'Fetch chats failed' });
+  }
 }
 
-// --- 3. FETCH HISTORY (Ye fix karega empty chat wala issue) ---
+// --- 3. GET MESSAGES (FROM MESSAGE COLLECTION) ---
 async function getMessages(req, res) {
-    try {
-        const { chatId } = req.params;
-        const userId = req.user.id;
+  try {
+    const { chatId } = req.params;
 
-        // Chat dhoondo aur uske messages return karo
-        const chat = await chatModel.findOne({ _id: chatId, user: userId });
-        if (!chat) return res.status(404).json({ message: "Neural stream not found" });
+    const messages = await messageModel
+      .find({ chatId })
+      .sort({ createdAt: 1 });
 
-        res.status(200).json({ messages: chat.messages || [] });
-    } catch (error) {
-        res.status(500).json({ message: "History retrieval failed" });
-    }
+    res.json({ messages });
+  } catch {
+    res.status(500).json({ message: 'Message fetch failed' });
+  }
 }
 
 // --- 4. RENAME CHAT ---
 async function renameChat(req, res) {
-    try {
-        const { chatId } = req.params;
-        const { title } = req.body;
-        const userId = req.user.id;
-        const chat = await chatModel.findOneAndUpdate({ _id: chatId, user: userId }, { title }, { new: true });
-        if (!chat) return res.status(404).json({ message: "Chat not found" });
-        res.status(200).json({ message: "Renamed", chat });
-    } catch (error) {
-        res.status(500).json({ message: "Rename Error" });
-    }
+  try {
+    const chat = await chatModel.findOneAndUpdate(
+      { _id: req.params.chatId, user: req.user.id },
+      { title: req.body.title },
+      { new: true }
+    );
+
+    if (!chat) return res.status(404).json({ message: 'Chat not found' });
+
+    res.json({ chat });
+  } catch {
+    res.status(500).json({ message: 'Rename failed' });
+  }
 }
 
-// --- 5. SEND MESSAGE & PERSIST (Save to DB) ---
+// --- 5. SEND MESSAGE (REAL FIX) ---
 async function sendMessage(req, res) {
-    try {
-        const { chatId, content } = req.body;
-        const userId = req.user.id;
+  try {
+    const { chatId, content } = req.body;
+    const userId = req.user.id;
 
-        const chat = await chatModel.findOne({ _id: chatId, user: userId });
-        if (!chat) return res.status(404).json({ message: "Stream connection lost" });
+    // validate chat
+    const chat = await chatModel.findOne({ _id: chatId, user: userId });
+    if (!chat) return res.status(404).json({ message: 'Chat not found' });
 
-        chat.messages.push({ role: 'user', content: content });
-        await chat.save(); 
+    // 1️⃣ save USER message
+    await messageModel.create({
+      chatId,
+      userId,
+      role: 'user',
+      content
+    });
 
-        const aiReply = await aiService.genrateResponse([{ role: "user", content: content }]);
+    // 2️⃣ AI response
+    const aiReply = await aiService.genrateResponse([
+      { role: 'user', content }
+    ]);
 
-        chat.messages.push({ role: 'ai', content: aiReply });
-        await chat.save();
+    // 3️⃣ save AI message
+    await messageModel.create({
+      chatId,
+      userId,
+      role: 'ai',
+      content: aiReply
+    });
 
-        res.status(200).json({ aiContent: aiReply });
-    } catch (error) {
-        console.error("AI Broadcast Error:", error);
-        res.status(500).json({ message: "Failed to reach AI Core" });
-    }
+    // 4️⃣ update chat meta
+    chat.lastMessage = aiReply;
+    chat.updatedAt = new Date();
+    await chat.save();
+
+    res.json({ aiContent: aiReply });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'AI failed' });
+  }
 }
 
 module.exports = {
-    createChat,
-    getAllChats,
-    renameChat,
-    sendMessage,
-    getMessages 
+  createChat,
+  getAllChats,
+  getMessages,
+  renameChat,
+  sendMessage
 };
