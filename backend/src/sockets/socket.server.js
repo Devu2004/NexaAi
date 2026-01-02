@@ -10,45 +10,38 @@ const { createMemory, queryMemory } = require("../services/vector.service");
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: ["http://localhost:5173", "https://your-vercel-link.vercel.app"], // Apna Vercel link dalo
+      origin: "*",
       credentials: true,
     },
   });
 
-  // 🔐 AUTH MIDDLEWARE (FIXED FOR DEPLOYMENT)
+  // 🔐 AUTH MIDDLEWARE
   io.use(async (socket, next) => {
     try {
-      // 1. Token check: Cookies se ya Authorization Header se ya Auth Object se
       const cookies = cookie.parse(socket.handshake.headers?.cookie || "");
-      const token = cookies.token || socket.handshake.auth?.token || socket.handshake.headers?.authorization?.split(" ")[1];
+      if (!cookies.token) return next(new Error("Token missing"));
 
-      if (!token) {
-        console.log("❌ Socket Auth Failed: No Token");
-        return next(new Error("Authentication error: Token missing"));
-      }
-
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await userModel.findById(decoded.id).lean(); // lean() for performance
-      
+      const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET);
+      const user = await userModel.findById(decoded.id);
       if (!user) return next(new Error("User not found"));
 
       socket.user = user;
       next();
     } catch (err) {
-      console.error("❌ Socket JWT Error:", err.message);
       next(new Error("Invalid token"));
     }
   });
 
+  // 🔌 SOCKET CONNECTION
   io.on("connection", (socket) => {
-    console.log(`🚀 Neural Node Connected: ${socket.user.fullName.firstName}`);
+    console.log(`✅ User connected: ${socket.user._id}`);
 
     socket.on("ai-message", async ({ chat, content }) => {
       try {
-        console.log(`📩 Message received for chat: ${chat}`);
-
         /**
-         * STEP 1: Save User Message & Generate Vector
+         * STEP 1: Parallel Tasks
+         * 1. Save User Message to Mongoose
+         * 2. Generate Vectors for RAG
          */
         const [userMessage, vectors] = await Promise.all([
           messageModel.create({
@@ -60,94 +53,99 @@ function initSocketServer(httpServer) {
           generateVector(content),
         ]);
 
-        console.log("✅ Message saved & Vector generated");
-
-        /**
-         * STEP 2: Query Pinecone Memory
-         */
-        let memoryContext = "";
-        try {
-            const memories = await queryMemory({
-                queryVector: vectors,
-                limit: 5,
-                metadata: { chat: chat.toString() },
-            });
-            memoryContext = memories.map((m) => m.metadata?.text).filter(Boolean).join("\n");
-        } catch (memErr) {
-            console.error("⚠️ Pinecone Query Failed:", memErr.message);
+        if (!vectors || !Array.isArray(vectors)) {
+          throw new Error("Vector generation failed");
         }
 
         /**
-         * STEP 3: Chat History
+         * STEP 2: Fetch Context
+         * 1. Query Pinecone for relevant memories
+         * 2. Get recent Mongoose chat history (excluding the message we just saved to avoid duplicates)
          */
-        const chatHistory = (
-          await messageModel
-            .find({ chat })
+        const [memories, rawHistory] = await Promise.all([
+          queryMemory({
+            queryVector: vectors,
+            limit: 3,
+            metadata: { chat: chat.toString() },
+          }),
+          messageModel
+            .find({ chat, _id: { $ne: userMessage._id } }) // Exclude current message
             .sort({ createdAt: -1 })
-            .limit(6) // Thoda bada history for better context
-            .lean()
-        ).reverse();
+            .limit(5)
+            .lean(),
+        ]);
 
-        const messagesForAI = chatHistory.map((msg) => ({
+        const memoryContext = memories
+          .map((m) => m.metadata?.text)
+          .filter(Boolean)
+          .join("\n");
+
+        const chatHistory = rawHistory.reverse().map((msg) => ({
           role: msg.role === "model" ? "assistant" : "user",
           content: msg.content,
         }));
 
         /**
-         * STEP 4: Call AI
+         * STEP 3: AI Prompt Construction
          */
-        const systemPrompt = {
+        const messagesWithContext = [
+          {
             role: "system",
-            content: `You are Nexa AI. Help the user. \nContext: ${memoryContext}`
-        };
+            content: `
+You are Nexa AI, a smart and friendly developer assistant. 
+Reply in the language the user uses (English/Hindi/Hinglish).
 
-        const aiResponse = await aiServices.genrateResponse([systemPrompt, ...messagesForAI]);
+${memoryContext ? `Relevant context from past: ${memoryContext}` : ""}
+
+Instruction: Use context only if relevant. Be concise and helpful.`
+          },
+          ...chatHistory,
+          { role: "user", content: content }, // Add current message at the end
+        ];
 
         /**
-         * STEP 5: Save AI Response to DB
+         * STEP 4: Generate & Store AI Response
          */
-        const savedAIResponse = await messageModel.create({
+        const aiResponse = await aiServices.genrateResponse(messagesWithContext);
+
+        const savedAiMsg = await messageModel.create({
           chat,
           user: socket.user._id,
           content: aiResponse,
           role: "model",
         });
 
-        console.log("✅ AI Response saved to MongoDB");
-
         /**
-         * STEP 6: Store in Pinecone (Wait for it to ensure it saves)
+         * STEP 5: Async Pinecone Store (Don't await to keep socket fast)
          */
-        await createMemory({
+        createMemory({
           vectors,
           messageId: userMessage._id.toString(),
           metadata: {
             chat: chat.toString(),
-            user: socket.user._id.toString(),
             text: content,
             role: "user",
           },
-        });
+        }).catch((err) => console.error("Pinecone storage error:", err));
 
-        console.log("✅ Memory stored in Pinecone");
-
-        // Step 7: Final Emit
+        // Emit final response
         socket.emit("ai-response", {
           chat,
           content: aiResponse,
+          messageId: savedAiMsg._id
         });
 
       } catch (error) {
-        console.error("🔥 CRITICAL SOCKET ERROR:", error);
+        console.error("AI SOCKET ERROR:", error.message);
         socket.emit("ai-response", {
           chat,
-          content: "⚠️ System failure. Check logs.",
+          content: "⚠️ Sorry, I'm having trouble connecting right now.",
         });
       }
     });
 
     socket.on("disconnect", () => {
-      console.log(`❌ Node Disconnected: ${socket.user._id}`);
+      console.log(`❌ User disconnected: ${socket.user._id}`);
     });
   });
 }

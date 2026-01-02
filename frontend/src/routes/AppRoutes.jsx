@@ -1,27 +1,35 @@
 import React from 'react';
 import { Route, BrowserRouter, Routes, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+
+// Pages
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import Home from '../pages/Home';
 import ForgotPassword from '../pages/ForgotPassword';
 
-// --- 1. PROTECTED ROUTE LOGIC ---
-// Sirf logged-in users ke liye (Token check)
+/**
+ * 1. PROTECTED ROUTE
+ * Sirf login karne wale users Dashboard (Home) dekh payenge.
+ */
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('nova_auth_token');
   
+  // Agar token nahi hai, to login page par bhej do
   if (!token) {
     return <Navigate to="/login" replace />;
   }
   return children;
 };
 
-// --- 2. PUBLIC ROUTE LOGIC ---
-// Logged-in users ko Auth pages (Login/Register) par jane se rokega
+/**
+ * 2. PUBLIC ROUTE
+ * Agar user pehle se logged-in hai, to use Login/Register page nahi dikhna chahiye.
+ */
 const PublicRoute = ({ children }) => {
   const token = localStorage.getItem('nova_auth_token');
   
+  // Agar token hai, to seedha Home page par redirect karo
   if (token) {
     return <Navigate to="/" replace />;
   }
@@ -32,10 +40,11 @@ const AnimatedRoutes = () => {
   const location = useLocation();
   
   return (
+    // mode="wait" ensures current page finishes exit animation before next one enters
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         
-        {/* PROTECTED: Dashboard sirf login ke baad khulega */}
+        {/* HOME (Protected) */}
         <Route 
           path="/" 
           element={
@@ -45,7 +54,7 @@ const AnimatedRoutes = () => {
           } 
         />
 
-        {/* PUBLIC: Login/Register sirf tab dikhenge jab user logged-out ho */}
+        {/* AUTH ROUTES (Public Only) */}
         <Route 
           path="/login" 
           element={
@@ -59,14 +68,14 @@ const AnimatedRoutes = () => {
           path="/register" 
           element={
             <PublicRoute>
-              <Register />
+              <Register  />
             </PublicRoute>
           } 
         />
 
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
-        {/* FALLBACK: Galat URL par seedha Home (jo redirect handle kar lega) */}
+        {/* 404/FALLBACK */}
         <Route path="*" element={<Navigate to="/" replace />} />
 
       </Routes>
