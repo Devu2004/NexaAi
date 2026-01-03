@@ -137,7 +137,6 @@ const Register = () => {
               disabled={isLoading}
             />
             
-            {/* Action Button - Space added for mobile */}
             <div className="auth-action-zone">
                 <Button 
                 variant="primary" 

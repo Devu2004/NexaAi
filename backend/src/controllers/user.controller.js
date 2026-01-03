@@ -3,14 +3,12 @@ const userModel = require('../models/user.model');
 // A. Logged-in User ka data nikalna
 async function getUserProfile(req, res) {
     try {
-        // req.user.id authMiddleware se aa raha hai
         const user = await userModel.findById(req.user.id).select('-password');
         
         if (!user) return res.status(404).json({ message: "User not found" });
         
         res.status(200).json({
             id: user._id,
-            // Yahan badlav kiya hai: fullName.firstName use karo
             name: user.fullName.firstName, 
             status: user.status || 'System Online',
             image: user.image || ''
@@ -27,11 +25,10 @@ async function updateProfile(req, res) {
         const { name, status, image } = req.body;
         const userId = req.user.id;
 
-        // Tune Model mein fullName rakha hai, toh update bhi wahi karna hoga
         const updatedUser = await userModel.findByIdAndUpdate(
             userId,
             { 
-                'fullName.firstName': name, // 'name' ko firstName mein save kar rahe hain
+                'fullName.firstName': name, 
                 status: status, 
                 image: image 
             }, 

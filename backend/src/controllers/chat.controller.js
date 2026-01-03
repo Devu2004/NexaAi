@@ -64,7 +64,7 @@ async function renameChat(req, res) {
   }
 }
 
-// --- 5. SEND MESSAGE (REAL FIX) ---
+// --- 5. SEND MESSAGE  ---
 async function sendMessage(req, res) {
   try {
     const { chatId, content } = req.body;

@@ -18,7 +18,6 @@ const ChatContainer = ({ activeChatId, userName }) => {
   const firstName = displayName.split(' ')[0];
 
   // 1. FETCH MESSAGE HISTORY (Persistence Fix)
-  // Jab bhi chat switch hogi, ye purane messages load karega
   useEffect(() => {
     const fetchMessages = async () => {
       if (!activeChatId) {
@@ -28,12 +27,10 @@ const ChatContainer = ({ activeChatId, userName }) => {
       
       try {
         setIsLoading(true);
-        // Pehle UI saaf karo (Optional, but better UX)
         setMessages([]); 
         
         const response = await api.get(`/chat/${activeChatId}/messages`);
         
-        // Backend se aayi history ko state mein save karo
         if (response.data && response.data.messages) {
           setMessages(response.data.messages);
         }
@@ -74,19 +71,16 @@ const ChatContainer = ({ activeChatId, userName }) => {
     const userMsgContent = input;
     setInput('');
     
-    // User message local state mein turant dalo
     const userMsg = { role: 'user', content: userMsgContent };
     setMessages(prev => [...prev, userMsg]);
     setIsLoading(true);
 
     try {
-      // Backend ko message bhejo (Backend ise DB mein save bhi karega)
       const response = await api.post('/chat/message', { 
         chatId: activeChatId, 
         content: userMsgContent 
       });
 
-      // AI response state mein dalo
       const aiResponse = { 
         role: 'ai', 
         content: response.data.aiContent 

@@ -64,7 +64,7 @@ function initSocketServer(httpServer) {
         ========================= */
         const vectors = await generateVector(content);
 
-        // ✅ Message collection (AI ke liye)
+        // ✅ Message collection 
         const userMessage = await messageModel.create({
           chat,
           user: socket.user._id,
@@ -72,7 +72,7 @@ function initSocketServer(httpServer) {
           role: "user",
         });
 
-        // ✅ Chat.messages array (UI ke liye)
+        // ✅ Chat.messages array 
         chatDoc.messages.push({
           role: "user",
           content,
@@ -135,7 +135,7 @@ Be concise.
 
         // ✅ Chat.messages array
         chatDoc.messages.push({
-          role: "ai", // frontend expects "ai"
+          role: "ai", 
           content: aiReply,
         });
         chatDoc.updatedAt = new Date();

@@ -59,7 +59,6 @@ const MemoryVault = ({ isOpen, onClose, memories }) => {
               <div className="memory-list">
                 <p className="list-label">Recent Extractions</p>
                 
-                {/* Static Example: Isse backend se connect karenge baad mein */}
                 <div className="memory-item">
                   <div className="item-meta">
                     <Clock size={12} />

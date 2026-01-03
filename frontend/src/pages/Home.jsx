@@ -14,14 +14,12 @@ const Home = () => {
   const [chats, setChats] = useState([]); 
   const [activeChatId, setActiveChatId] = useState(null); 
 
-  // 1. INITIAL STATE: "Devansh" hata kar empty strings rakhe hain
   const [user, setUser] = useState({ name: '', status: '', image: null });
 
   // 2. FETCH INITIAL DATA (Chats + User Profile)
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        // --- A. Profile Fetch Karo (Asli naam ke liye) ---
         const userRes = await api.get('/user/profile');
         if (userRes.data) {
           setUser({
@@ -125,7 +123,6 @@ const Home = () => {
                 <div className="user-block">
                   <div className="user-indicator desktop-only">
                     <div className="status-dot"></div>
-                    {/* User name display fixed */}
                     <span className="user-id">{user.name ? user.name.toUpperCase() : 'LOADING...'}</span>
                   </div>
                   <button className="profile-trigger" onClick={() => setIsProfileOpen(true)}>

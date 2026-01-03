@@ -328,14 +328,14 @@
 
   .copy-btn {
     position: absolute;
-    right: -40px; // Message box ke bahar side mein
+    right: -40px; 
     top: 10px;
     padding: 6px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(255, 255, 255, 0.05);
     color: #666;
-    opacity: 0; // Shuru mein chhupa do
+    opacity: 0; 
     transition: all 0.2s ease;
     cursor: pointer;
 
@@ -353,7 +353,7 @@
   }
 
   &:hover .copy-btn {
-    opacity: 1; // Message par hover karte hi button dikhega
-    right: 0px; // Halka sa slide in effect
+    opacity: 1; 
+    right: 0px; 
   }
 }

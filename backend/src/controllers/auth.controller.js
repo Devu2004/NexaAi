@@ -45,7 +45,7 @@ async function registeruser(req, res) {
   }
 }
 
-// --- 2. LOGIN USER (Fix for Bcrypt Error) ---
+// --- 2. LOGIN USER  ---
 async function loginuser(req, res) {
   try {
     const { email, password } = req.body;

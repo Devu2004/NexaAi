@@ -5,7 +5,7 @@ import { ArrowRight, Fingerprint, Loader2 } from 'lucide-react';
 import PageWrapper from '../components/layout/PageWrapper';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
-import api from '../services/api'; // Axios instance import kiya
+import api from '../services/api'; 
 import './Auth.scss';
 
 const Login = () => {
@@ -19,8 +19,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(''); // Purana error clear karo
-
+    setError(''); 
     try {
       // 1. Real Backend API Call
       const response = await api.post('/auth/login/user', { 
@@ -28,20 +27,16 @@ const Login = () => {
         password 
       });
 
-      // 2. Token Save karna (Backend token response.data.token mein bhej raha hai)
       if (response.data.token) {
         localStorage.setItem('nova_auth_token', response.data.token);
         console.log(localStorage.getItem('nova_auth_token'));
         
       } else {
-        // Agar cookie base auth hai toh dummy token set kar do route protection ke liye
         localStorage.setItem('nova_auth_token', 'verified_session');
       }
 
-      // 3. Success! Home par bhej do
       navigate('/');
     } catch (err) {
-      // 4. Error Handling
       const errorMessage = err.response?.data?.message || "Neural connection refused. Check credentials.";
       setError(errorMessage);
     } finally {
@@ -67,7 +62,6 @@ const Login = () => {
             <p>Synchronize your node with the Nova Core stream.</p>
           </header>
 
-          {/* Error Message Display */}
           {error && (
             <motion.div 
               initial={{ opacity: 0, x: -10 }} 

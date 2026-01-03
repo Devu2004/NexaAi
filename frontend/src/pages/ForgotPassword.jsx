@@ -33,7 +33,6 @@ const ForgotPassword = () => {
     }
   };
 
-  // Step 2: OTP sirf state mein save karna (Verification Step 3 mein Password ke sath hogi)
   const handleVerifyOTP = (e) => {
     e.preventDefault();
     if (otp.length < 6) {
@@ -41,7 +40,7 @@ const ForgotPassword = () => {
       return;
     }
     setError('');
-    setStep(3); // Password change wale step par jao
+    setStep(3); 
   };
 
   // Step 3: Final Reset (OTP + New Password)
@@ -50,7 +49,6 @@ const ForgotPassword = () => {
     setIsLoading(true);
     setError('');
     try {
-      // Backend controller 'resetPassword' ko hit kar rahe hain
       await api.post('/auth/reset-password', { 
         email, 
         otp: Number(otp), 

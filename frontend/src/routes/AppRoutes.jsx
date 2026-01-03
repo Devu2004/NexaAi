@@ -13,7 +13,6 @@ const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('nova_auth_token');
   
   if (!token) {
-    // replace={true} history stack ko clean rakhta hai
     return <Navigate to="/login" replace />;
   }
   return children;

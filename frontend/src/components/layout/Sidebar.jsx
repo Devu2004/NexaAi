@@ -28,7 +28,7 @@ const Sidebar = ({ isOpen, setOpen, onNewChat, chats = [], activeChatId, setActi
 
   // 2. Rename Start (State Setup)
   const startEditing = (e, chat) => {
-    e.stopPropagation(); // Parent click (setActiveChatId) ko rokne ke liye
+    e.stopPropagation(); 
     setEditingId(chat.id);
     setTempTitle(chat.title || '');
   };
@@ -36,7 +36,6 @@ const Sidebar = ({ isOpen, setOpen, onNewChat, chats = [], activeChatId, setActi
   // 3. Rename Save (Backend Handshake)
   const saveRename = async (chatId) => {
     if (tempTitle.trim()) {
-      // Home.jsx ke renameChat function ko call karega jo API hit karega
       await onRenameChat(chatId, tempTitle);
     }
     setEditingId(null);

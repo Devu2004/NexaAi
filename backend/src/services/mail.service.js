@@ -1,28 +1,23 @@
 const nodemailer = require('nodemailer');
 
-// 1. Postman (Transporter) setup karo
-// Ye tera system account use karega mails bhejne ke liye
+
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     auth: {
-        user: process.env.EMAIL_USER, // Tera Gmail (from .env)
-        pass: process.env.EMAIL_PASS  // Tera 16-digit App Password (from .env)
+        user: process.env.EMAIL_USER, 
+        pass: process.env.EMAIL_PASS  
     }
 });
 
-/**
- * Service: sendOTPMail
- * Purpose: User ko recovery code wala futuristic email bhejna
- */
+
 const sendOTPMail = async (email, otp) => {
     const mailOptions = {
         from: `"Nova Core Support" <${process.env.EMAIL_USER}>`,
         to: email,
         subject: 'NODE_RECOVERY: Identity Verification Code',
-        // Futuristic HTML Template
         html: `
             <div style="font-family: 'JetBrains Mono', monospace, sans-serif; background-color: #050505; color: #ffffff; padding: 40px; border: 1px solid #1a1a1a; border-radius: 12px; max-width: 500px; margin: auto;">
                 <div style="text-align: center; margin-bottom: 30px;">
